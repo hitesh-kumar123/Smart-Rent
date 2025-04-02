@@ -1,4 +1,4 @@
-const Joi = require('joi');
+const Joi = require("joi");
 
 // User validation schema
 const registerSchema = Joi.object({
@@ -7,13 +7,13 @@ const registerSchema = Joi.object({
   password: Joi.string().min(6).required(),
   firstName: Joi.string().required(),
   lastName: Joi.string().required(),
-  phone: Joi.string().allow(''),
-  referralCode: Joi.string().allow('')
+  phone: Joi.string().allow(""),
+  referralCode: Joi.string().allow(""),
 });
 
 const loginSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().required()
+  password: Joi.string().required(),
 });
 
 const updateUserSchema = Joi.object({
@@ -21,25 +21,40 @@ const updateUserSchema = Joi.object({
   email: Joi.string().email(),
   firstName: Joi.string(),
   lastName: Joi.string(),
-  phone: Joi.string().allow(''),
-  bio: Joi.string().allow(''),
-  location: Joi.string().allow('')
+  phone: Joi.string().allow(""),
+  bio: Joi.string().allow(""),
+  location: Joi.string().allow(""),
 });
 
 const passwordSchema = Joi.object({
   currentPassword: Joi.string().required(),
   newPassword: Joi.string().min(6).required(),
-  confirmPassword: Joi.string().valid(Joi.ref('newPassword')).required()
-    .messages({ 'any.only': 'Confirm password must match new password' })
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("newPassword"))
+    .required()
+    .messages({ "any.only": "Confirm password must match new password" }),
+});
+
+const passwordResetRequestSchema = Joi.object({
+  email: Joi.string().email().required(),
 });
 
 // Property validation schema
 const propertySchema = Joi.object({
   title: Joi.string().min(3).max(100).required(),
   description: Joi.string().min(10).required(),
-  category: Joi.string().valid(
-    'Apartment', 'House', 'Villa', 'Condo', 'Cabin', 'Cottage', 'Farmhouse', 'Other'
-  ).required(),
+  category: Joi.string()
+    .valid(
+      "Apartment",
+      "House",
+      "Villa",
+      "Condo",
+      "Cabin",
+      "Cottage",
+      "Farmhouse",
+      "Other"
+    )
+    .required(),
   price: Joi.number().min(1).required(),
   location: Joi.object({
     address: Joi.string().required(),
@@ -47,7 +62,7 @@ const propertySchema = Joi.object({
     state: Joi.string().required(),
     country: Joi.string().required(),
     zipCode: Joi.string().required(),
-    coordinates: Joi.array().items(Joi.number()).length(2).required()
+    coordinates: Joi.array().items(Joi.number()).length(2).required(),
   }).required(),
   amenities: Joi.object({
     wifi: Joi.boolean(),
@@ -63,30 +78,30 @@ const propertySchema = Joi.object({
     hotTub: Joi.boolean(),
     breakfast: Joi.boolean(),
     workspace: Joi.boolean(),
-    petFriendly: Joi.boolean()
+    petFriendly: Joi.boolean(),
   }),
   capacity: Joi.object({
     guests: Joi.number().min(1).required(),
     bedrooms: Joi.number().min(1).required(),
     beds: Joi.number().min(1).required(),
-    bathrooms: Joi.number().min(1).required()
+    bathrooms: Joi.number().min(1).required(),
   }).required(),
   rules: Joi.object({
     smoking: Joi.boolean(),
     pets: Joi.boolean(),
     parties: Joi.boolean(),
     checkInTime: Joi.string(),
-    checkOutTime: Joi.string()
-  })
+    checkOutTime: Joi.string(),
+  }),
 });
 
 // Booking validation schema
 const bookingSchema = Joi.object({
   property: Joi.string().required(),
-  checkIn: Joi.date().greater('now').required(),
-  checkOut: Joi.date().greater(Joi.ref('checkIn')).required(),
+  checkIn: Joi.date().greater("now").required(),
+  checkOut: Joi.date().greater(Joi.ref("checkIn")).required(),
   numGuests: Joi.number().min(1).required(),
-  message: Joi.string().allow('')
+  message: Joi.string().allow(""),
 });
 
 // Review validation schema
@@ -98,14 +113,14 @@ const reviewSchema = Joi.object({
   communication: Joi.number().min(1).max(5),
   location: Joi.number().min(1).max(5),
   checkIn: Joi.number().min(1).max(5),
-  value: Joi.number().min(1).max(5)
+  value: Joi.number().min(1).max(5),
 });
 
 // Message validation schema
 const messageSchema = Joi.object({
   content: Joi.string().required().max(1000),
   receiver: Joi.string().required(),
-  conversation: Joi.string().required()
+  conversation: Joi.string().required(),
 });
 
 module.exports = {
@@ -113,8 +128,9 @@ module.exports = {
   loginSchema,
   updateUserSchema,
   passwordSchema,
+  passwordResetRequestSchema,
   propertySchema,
   bookingSchema,
   reviewSchema,
-  messageSchema
+  messageSchema,
 };
