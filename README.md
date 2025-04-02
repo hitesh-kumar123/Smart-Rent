@@ -1,15 +1,22 @@
 # Smart Rent System
+
 Full name = Hitesh Kumar
 username: hitesh123
 Email address = try.other220@gmail.com
 Password = Hitesh@123
-Confirm password =  Hitesh@123
+Confirm password = Hitesh@123
 
 Full name = John Smith
 Username: johnsmith123
 Email address = john.smith@example.com
 Password = Password123
 Confirm password = Password123
+
+Full name = subham chohan
+Username: subham@123
+Email address = subhamchohan@gmail.com
+Password = subham#123
+Confirm password =subham#123
 
 A full-stack MERN (MongoDB, Express, React, Node.js) application for property rental management. This platform connects property owners with potential renters, providing a seamless experience for listing, discovering, and booking properties.
 Property Detail Page - Create a dedicated page that shows when users click "View Details" button
@@ -22,20 +29,24 @@ Property Owner Dashboard - For listing and managing properties
 Search History - Save users' recent searches
 Map View - Show properties on an interactive map
 Your listings page with the filtering and sorting is already quite well-implemented, with all 44 properties showing correctly
+
 ## Features
 
 - **User Authentication**
+
   - Register, login, and profile management
   - Role-based access (Admin, Host, Guest)
   - Password reset functionality
 
 - **Property Management**
+
   - Create, update, and delete property listings
   - Upload multiple property images
   - Manage property availability
   - Property approval workflow (for Admin)
 
 - **Booking System**
+
   - Create and manage bookings
   - View booking history
   - Cancel bookings
@@ -43,10 +54,12 @@ Your listings page with the filtering and sorting is already quite well-implemen
   - Generate invoices
 
 - **Reviews and Ratings**
+
   - Leave and view property reviews
   - Rating system for properties
 
 - **Wishlist**
+
   - Add/remove properties to/from wishlist
   - View wishlist items
 
@@ -70,6 +83,7 @@ Your listings page with the filtering and sorting is already quite well-implemen
 ## Setup Instructions
 
 ### Prerequisites
+
 - Node.js (v14 or higher)
 - MongoDB (local or Atlas)
 - npm or yarn
@@ -77,17 +91,20 @@ Your listings page with the filtering and sorting is already quite well-implemen
 ### Installation
 
 1. Clone the repository
+
    ```
    git clone <repository-url>
    cd smart-rent-system
    ```
 
 2. Install server dependencies
+
    ```
    npm install
    ```
 
 3. Install client dependencies
+
    ```
    cd client
    npm install
@@ -95,6 +112,7 @@ Your listings page with the filtering and sorting is already quite well-implemen
    ```
 
 4. Create a `.env` file in the root directory with the following variables:
+
    ```
    PORT=8000
    NODE_ENV=development
@@ -111,6 +129,7 @@ Your listings page with the filtering and sorting is already quite well-implemen
    ```
 
 5. Run the development server
+
    ```
    npm run dev
    ```
@@ -120,6 +139,7 @@ Your listings page with the filtering and sorting is already quite well-implemen
 ### Production Deployment
 
 For production deployment:
+
 ```
 npm run build
 npm start
