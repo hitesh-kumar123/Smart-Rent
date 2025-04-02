@@ -1,11 +1,23 @@
+/**
+ * Trips Component
+ * Displays user's trips organized by status (upcoming, current, past)
+ * Features trip details, host information, and trip management options
+ * Includes review functionality for completed trips
+ */
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const Trips = () => {
-  // State to manage the active tab (upcoming, current, or past trips)
-  const [activeTab, setActiveTab] = useState("upcoming");
+  // State management for tabs and review modal
+  const [activeTab, setActiveTab] = useState("upcoming"); // Track active tab selection
+  const [showReviewModal, setShowReviewModal] = useState(false); // Control review modal visibility
+  const [currentReviewTrip, setCurrentReviewTrip] = useState(null); // Track which trip is being reviewed
+  const [reviewData, setReviewData] = useState({
+    rating: 5, // Default to 5-star rating
+    comment: "", // User's review text
+  });
 
-  // Mock data for trips: upcoming, current, and past trips with their details
+  // Mock trip data - would come from API in production
   const trips = {
     upcoming: [
       {
@@ -27,7 +39,7 @@ const Trips = () => {
         },
         guests: 2,
         totalPrice: "$1,250",
-        status: "confirmed",
+        status: "confirmed", // Trip is confirmed but not started
       },
       {
         id: 2,
@@ -48,10 +60,10 @@ const Trips = () => {
         },
         guests: 3,
         totalPrice: "$950",
-        status: "pending",
+        status: "pending", // Trip is pending host approval
       },
     ],
-    current: [],
+    current: [], // No active trips in this example
     past: [
       {
         id: 3,
@@ -72,12 +84,63 @@ const Trips = () => {
         },
         guests: 4,
         totalPrice: "$2,100",
-        status: "completed",
+        status: "completed", // Trip is completed, eligible for review
       },
     ],
   };
 
-  // Function to render a trip card based on trip data
+  /**
+   * Opens the review modal for a specific trip
+   * @param {Object} trip - The trip being reviewed
+   */
+  const handleOpenReviewModal = (trip) => {
+    setCurrentReviewTrip(trip);
+    setShowReviewModal(true);
+    // Reset review data to defaults
+    setReviewData({
+      rating: 5,
+      comment: "",
+    });
+  };
+
+  /**
+   * Closes the review modal and resets state
+   */
+  const handleCloseReviewModal = () => {
+    setShowReviewModal(false);
+    setCurrentReviewTrip(null);
+  };
+
+  /**
+   * Handles review submission
+   * @param {Event} e - Form submit event
+   */
+  const handleSubmitReview = (e) => {
+    e.preventDefault();
+    // In a real app, this would make an API call to submit the review
+    alert(
+      `Review submitted: ${reviewData.rating} stars, "${reviewData.comment}"`
+    );
+    handleCloseReviewModal();
+  };
+
+  /**
+   * Updates review data as user inputs changes
+   * @param {Event} e - Input change event
+   */
+  const handleReviewChange = (e) => {
+    const { name, value } = e.target;
+    setReviewData((prev) => ({
+      ...prev,
+      [name]: name === "rating" ? parseInt(value) : value,
+    }));
+  };
+
+  /**
+   * Renders an individual trip card
+   * @param {Object} trip - Trip data to render
+   * @returns {JSX.Element} - Trip card UI
+   */
   const renderTripCard = (trip) => {
     return (
       <div
@@ -123,7 +186,7 @@ const Trips = () => {
                   </span>
                 </div>
               </div>
-              {/* Trip Status Badge (Confirmed, Pending, Completed) */}
+              {/* Trip Status Badge - Visual indicator of trip status */}
               <div className="ml-4 flex-shrink-0">
                 <span
                   className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
@@ -139,7 +202,7 @@ const Trips = () => {
               </div>
             </div>
 
-            {/* Trip Details Section */}
+            {/* Trip Details Section - Shows booking information */}
             <div className="mt-4 border-t border-neutral-200 pt-4">
               <div className="grid grid-cols-2 gap-4">
                 {/* Check-in Date */}
@@ -183,7 +246,7 @@ const Trips = () => {
 
             {/* Host Information and Action Buttons */}
             <div className="mt-6 flex items-center justify-between">
-              {/* Host Profile */}
+              {/* Host Profile - Shows host picture and name */}
               <div className="flex items-center">
                 <img
                   className="h-8 w-8 rounded-full object-cover"
@@ -196,9 +259,9 @@ const Trips = () => {
                 </p>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Buttons - Contextual actions based on trip status */}
               <div className="flex space-x-2">
-                {/* Message Host Button */}
+                {/* Message Host Button - Available for all trips */}
                 <Link
                   to={`/messages?property=${trip.id}`}
                   className="inline-flex items-center px-3 py-1.5 border border-neutral-300 text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50"
@@ -220,22 +283,36 @@ const Trips = () => {
                   Message
                 </Link>
 
-                {/* Manage/View Trip Button (for confirmed or pending trips) */}
+                {/* Manage/View Trip Button - Only for active/upcoming trips */}
                 {trip.status !== "completed" && (
                   <Link
                     to={`/trips/${trip.id}/manage`}
-                    onClick={(e) => {
-                      console.log(`Navigating to manage trip ${trip.id}`);
-                    }}
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 cursor-pointer"
                   >
                     {trip.status === "confirmed" ? "Manage" : "View"}
                   </Link>
                 )}
 
-                {/* Leave Review Button (for completed trips) */}
+                {/* Leave Review Button - Only for completed trips */}
                 {trip.status === "completed" && (
-                  <button className="inline-flex items-center px-3 py-1.5 border border-neutral-300 text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50">
+                  <button
+                    onClick={() => handleOpenReviewModal(trip)}
+                    className="inline-flex items-center px-3 py-1.5 border border-neutral-300 text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50"
+                  >
+                    <svg
+                      className="-ml-0.5 mr-1.5 h-4 w-4 text-neutral-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                      />
+                    </svg>
                     Leave a review
                   </button>
                 )}
@@ -253,7 +330,7 @@ const Trips = () => {
         {/* Page Title */}
         <h1 className="text-2xl font-bold text-neutral-800 mb-6">Trips</h1>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation - Switch between upcoming, current, and past trips */}
         <div className="border-b border-neutral-200 mb-6">
           <nav className="-mb-px flex space-x-8">
             {/* Upcoming Trips Tab Button */}
@@ -309,7 +386,7 @@ const Trips = () => {
           </nav>
         </div>
 
-        {/* Trip List Content Area */}
+        {/* Trip List Content Area - Shows trips or empty state */}
         <div>
           {/* Conditionally render trip cards or empty state message */}
           {trips[activeTab].length > 0 ? (
@@ -351,6 +428,138 @@ const Trips = () => {
           )}
         </div>
       </div>
+
+      {/* Review Modal - Appears when user clicks "Leave a review" */}
+      {showReviewModal && currentReviewTrip && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-neutral-50 px-6 py-4 border-b border-neutral-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-neutral-900">
+                  Review your stay
+                </h3>
+                <button
+                  onClick={handleCloseReviewModal}
+                  className="text-neutral-400 hover:text-neutral-500"
+                >
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Property Info - Shows which property is being reviewed */}
+            <div className="px-6 py-4 border-b border-neutral-200">
+              <div className="flex items-center">
+                <img
+                  className="h-16 w-16 object-cover rounded"
+                  src={currentReviewTrip.property.image}
+                  alt={currentReviewTrip.property.name}
+                />
+                <div className="ml-4">
+                  <h4 className="text-sm font-medium text-neutral-900">
+                    {currentReviewTrip.property.name}
+                  </h4>
+                  <p className="text-sm text-neutral-500">
+                    {currentReviewTrip.property.location}
+                  </p>
+                  <p className="text-sm text-neutral-500">
+                    {currentReviewTrip.dates.checkin} to{" "}
+                    {currentReviewTrip.dates.checkout}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Review Form - Rating and comment fields */}
+            <form onSubmit={handleSubmitReview} className="px-6 py-4">
+              {/* Rating - 5-star selection system */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Rating
+                </label>
+                <div className="flex items-center">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() =>
+                        setReviewData({ ...reviewData, rating: star })
+                      }
+                      className="focus:outline-none"
+                    >
+                      <svg
+                        className={`h-8 w-8 ${
+                          reviewData.rating >= star
+                            ? "text-yellow-400" // Filled star
+                            : "text-neutral-300" // Empty star
+                        }`}
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                    </button>
+                  ))}
+                  <span className="ml-2 text-sm text-neutral-500">
+                    {reviewData.rating} out of 5 stars
+                  </span>
+                </div>
+              </div>
+
+              {/* Review Comment - Text area for detailed feedback */}
+              <div className="mb-4">
+                <label
+                  htmlFor="comment"
+                  className="block text-sm font-medium text-neutral-700 mb-2"
+                >
+                  Your review
+                </label>
+                <textarea
+                  id="comment"
+                  name="comment"
+                  rows={4}
+                  value={reviewData.comment}
+                  onChange={handleReviewChange}
+                  placeholder="Share your experience at this property..."
+                  className="block w-full border border-neutral-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  required
+                />
+              </div>
+
+              {/* Action Buttons - Submit or cancel review */}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleCloseReviewModal}
+                  className="mr-3 inline-flex items-center px-4 py-2 border border-neutral-300 text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
+                >
+                  Submit review
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
