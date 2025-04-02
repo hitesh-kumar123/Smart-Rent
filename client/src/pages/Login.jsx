@@ -368,7 +368,16 @@ const Login = () => {
                 <div className="text-sm">
                   <button
                     type="button"
-                    onClick={() => setShowForgotPassword(true)}
+                    onClick={() => {
+                      if (!formData.email || formData.email.trim() === "") {
+                        setError(
+                          "Please enter your email address before requesting a password reset."
+                        );
+                      } else {
+                        setShowForgotPassword(true);
+                        setResetEmail(formData.email); // Pre-populate the reset email field with the login email
+                      }
+                    }}
                     className="font-medium text-primary-600 hover:text-primary-500"
                   >
                     Forgot your password?
