@@ -13,7 +13,14 @@ const Register = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { register, isAuthenticated, error: authError } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const {
+    register,
+    isAuthenticated,
+    error: authError,
+    socialLogin,
+  } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -74,6 +81,36 @@ const Register = () => {
       }
     } catch (err) {
       setError(err.message || "An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const result = await socialLogin("google");
+      if (result && result.error) {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError(err.message || "Failed to login with Google");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const result = await socialLogin("facebook");
+      if (result && result.error) {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError(err.message || "Failed to login with Facebook");
     } finally {
       setLoading(false);
     }
@@ -198,17 +235,52 @@ const Register = () => {
               >
                 Password
               </label>
-              <div className="mt-1">
+              <div className="mt-1 relative">
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   required
                   value={formData.password}
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-500"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                      <path
+                        fillRule="evenodd"
+                        d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-500"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"
+                        clipRule="evenodd"
+                      />
+                      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
 
@@ -219,17 +291,52 @@ const Register = () => {
               >
                 Confirm password
               </label>
-              <div className="mt-1">
+              <div className="mt-1 relative">
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   autoComplete="new-password"
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-500"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                      <path
+                        fillRule="evenodd"
+                        d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-500"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"
+                        clipRule="evenodd"
+                      />
+                      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
 
@@ -285,10 +392,14 @@ const Register = () => {
               </div>
             </div>
 
+            {/* Social login buttons */}
             <div className="mt-6 grid grid-cols-2 gap-3">
+              {/* Google login button */}
               <div>
-                <a
-                  href="#"
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
                   className="w-full inline-flex justify-center py-2 px-4 border border-neutral-300 rounded-md shadow-sm bg-white text-sm font-medium text-neutral-700 hover:bg-neutral-50"
                 >
                   <span className="sr-only">Sign up with Google</span>
@@ -296,30 +407,46 @@ const Register = () => {
                     className="w-5 h-5"
                     viewBox="0 0 24 24"
                     fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path d="M12.545 12.151L12.545 12.151L12.545 12.151Q12.545 11.315 12.081 10.759Q11.618 10.203 10.674 10.203L10.674 10.203L10.674 10.203Q9.831 10.203 9.287 10.738Q8.742 11.272 8.742 12.151L8.742 12.151L8.742 12.151Q8.742 13.029 9.287 13.563Q9.831 14.098 10.674 14.098L10.674 14.098L10.674 14.098Q11.618 14.098 12.081 13.542Q12.545 12.986 12.545 12.151L12.545 12.151L12.545 12.151ZM10.674 16.905L10.674 16.905L10.674 16.905Q8.539 16.905 7.286 15.603Q6.033 14.301 6.033 12.151L6.033 12.151L6.033 12.151Q6.033 10 7.286 8.688Q8.539 7.376 10.674 7.376L10.674 7.376L10.674 7.376Q12.226 7.376 13.261 8.226Q14.297 9.075 14.559 10.482L14.559 10.482L14.559 10.482Q14.6 10.707 14.621 10.973Q14.642 11.24 14.642 11.486L14.642 11.486L14.642 11.486Q14.642 11.9 14.57 12.324L14.57 12.324L9.062 12.324L9.062 12.324Q9.184 13.101 9.678 13.563Q10.172 14.026 10.85 14.026L10.85 14.026L10.85 14.026Q11.436 14.026 11.829 13.798Q12.222 13.57 12.353 13.161L12.353 13.161L14.479 13.796L14.479 13.796Q14.195 14.987 13.226 15.946Q12.257 16.905 10.674 16.905L10.674 16.905L10.674 16.905ZM17.967 16.664L17.967 16.664L16.642 16.664L16.642 16.664Q16.305 16.664 16.043 16.428Q15.78 16.193 15.78 15.885L15.78 15.885L15.78 8.35L15.78 8.35Q15.78 8.001 16.043 7.765Q16.305 7.529 16.642 7.529L16.642 7.529L17.967 7.529L17.967 7.529Q18.304 7.529 18.566 7.765Q18.829 8.001 18.829 8.35L18.829 8.35L18.829 15.885L18.829 15.885Q18.829 16.193 18.566 16.428Q18.304 16.664 17.967 16.664L17.967 16.664L17.967 16.664Z" />
+                    <path
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      fill="#4285F4"
+                    />
+                    <path
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      fill="#34A853"
+                    />
+                    <path
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                      fill="#FBBC05"
+                    />
+                    <path
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      fill="#EA4335"
+                    />
                   </svg>
-                </a>
+                </button>
               </div>
 
+              {/* Facebook login button */}
               <div>
-                <a
-                  href="#"
+                <button
+                  type="button"
+                  onClick={handleFacebookLogin}
+                  disabled={loading}
                   className="w-full inline-flex justify-center py-2 px-4 border border-neutral-300 rounded-md shadow-sm bg-white text-sm font-medium text-neutral-700 hover:bg-neutral-50"
                 >
                   <span className="sr-only">Sign up with Facebook</span>
                   <svg
                     className="w-5 h-5"
-                    fill="currentColor"
+                    fill="#1877F2"
                     viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
-                      clipRule="evenodd"
-                    />
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
-                </a>
+                </button>
               </div>
             </div>
           </div>
