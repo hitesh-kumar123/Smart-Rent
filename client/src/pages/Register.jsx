@@ -2,7 +2,18 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
+/**
+ * Register Component
+ * Handles new user registration with form validation and social login options.
+ * Features:
+ * - Email/password registration
+ * - Social login via Google and Facebook
+ * - Form validation
+ * - Password visibility toggle
+ * - Optional username creation
+ */
 const Register = () => {
+  // Form state management
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -11,20 +22,22 @@ const Register = () => {
     confirmPassword: "",
     username: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state during API calls
+  const [error, setError] = useState(""); // Error message display
+  const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Toggle confirm password visibility
+
+  // Auth context provides registration, authentication state, and social login
   const {
     register,
     isAuthenticated,
     error: authError,
     socialLogin,
   } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useNavigate(); // For redirecting after registration
+  const location = useLocation(); // To get redirect path from location state
 
-  // Redirect if they're already logged in
+  // Redirect if user is already logged in
   useEffect(() => {
     if (isAuthenticated) {
       const from = location.state?.from?.pathname || "/";
@@ -32,18 +45,23 @@ const Register = () => {
     }
   }, [isAuthenticated, navigate, location]);
 
-  // Set error from auth context
+  // Set error from auth context when it changes
   useEffect(() => {
     if (authError) {
       setError(authError);
     }
   }, [authError]);
 
+  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  /**
+   * Handle form submission
+   * Validates form data and submits registration request
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -86,6 +104,10 @@ const Register = () => {
     }
   };
 
+  /**
+   * Handle Google OAuth login
+   * Initiates Google authentication flow via AuthContext
+   */
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
@@ -101,6 +123,10 @@ const Register = () => {
     }
   };
 
+  /**
+   * Handle Facebook OAuth login
+   * Initiates Facebook authentication flow via AuthContext
+   */
   const handleFacebookLogin = async () => {
     try {
       setLoading(true);
@@ -118,6 +144,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      {/* Header section with title and link to login */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-neutral-900">
           Create your account
@@ -133,15 +160,19 @@ const Register = () => {
         </p>
       </div>
 
+      {/* Registration form card */}
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {/* Error alert display */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
 
+          {/* Registration form */}
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Name fields - first and last name */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label
@@ -186,6 +217,7 @@ const Register = () => {
               </div>
             </div>
 
+            {/* Username field (optional) */}
             <div>
               <label
                 htmlFor="username"
@@ -207,6 +239,7 @@ const Register = () => {
               </div>
             </div>
 
+            {/* Email field */}
             <div>
               <label
                 htmlFor="email"
@@ -228,6 +261,7 @@ const Register = () => {
               </div>
             </div>
 
+            {/* Password field with show/hide toggle */}
             <div>
               <label
                 htmlFor="password"
@@ -284,6 +318,7 @@ const Register = () => {
               </div>
             </div>
 
+            {/* Confirm password field with show/hide toggle */}
             <div>
               <label
                 htmlFor="confirmPassword"
@@ -340,6 +375,7 @@ const Register = () => {
               </div>
             </div>
 
+            {/* Terms and conditions checkbox */}
             <div className="flex items-center">
               <input
                 id="terms"
@@ -369,6 +405,7 @@ const Register = () => {
               </label>
             </div>
 
+            {/* Register button */}
             <div>
               <button
                 type="submit"
@@ -380,6 +417,7 @@ const Register = () => {
             </div>
           </form>
 
+          {/* Social login section */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
