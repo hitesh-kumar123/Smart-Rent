@@ -9,7 +9,10 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { login, isAuthenticated, error: authError } = useAuth();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+  const { login, isAuthenticated, error: authError, resetPassword } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -53,20 +56,55 @@ const Login = () => {
     }
   };
 
+  const handlePasswordReset = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      await resetPassword(resetEmail);
+      setResetSent(true);
+    } catch (err) {
+      setError(err.message || "Failed to send password reset email.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetEmailChange = (e) => {
+    setResetEmail(e.target.value);
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-neutral-900">
-          Log in to your account
+          {showForgotPassword
+            ? "Reset your password"
+            : "Log in to your account"}
         </h2>
         <p className="mt-2 text-center text-sm text-neutral-600">
-          Or{" "}
-          <Link
-            to="/register"
-            className="font-medium text-primary-600 hover:text-primary-500"
-          >
-            create a new account
-          </Link>
+          {showForgotPassword ? (
+            <>
+              Remember your password?{" "}
+              <button
+                onClick={() => setShowForgotPassword(false)}
+                className="font-medium text-primary-600 hover:text-primary-500"
+              >
+                Back to login
+              </button>
+            </>
+          ) : (
+            <>
+              Or{" "}
+              <Link
+                to="/register"
+                className="font-medium text-primary-600 hover:text-primary-500"
+              >
+                create a new account
+              </Link>
+            </>
+          )}
         </p>
       </div>
 
@@ -78,85 +116,127 @@ const Login = () => {
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-neutral-700"
-              >
-                Email address
-              </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                />
-              </div>
+          {resetSent && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4">
+              Password reset email sent. Please check your inbox.
             </div>
+          )}
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-neutral-700"
-              >
-                Password
-              </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember_me"
-                  name="remember_me"
-                  type="checkbox"
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
-                />
+          {showForgotPassword ? (
+            <form className="space-y-6" onSubmit={handlePasswordReset}>
+              <div>
                 <label
-                  htmlFor="remember_me"
-                  className="ml-2 block text-sm text-neutral-700"
+                  htmlFor="resetEmail"
+                  className="block text-sm font-medium text-neutral-700"
                 >
-                  Remember me
+                  Email address
                 </label>
+                <div className="mt-1">
+                  <input
+                    id="resetEmail"
+                    name="resetEmail"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={resetEmail}
+                    onChange={handleResetEmailChange}
+                    className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  />
+                </div>
               </div>
 
-              <div className="text-sm">
-                <a
-                  href="#"
-                  className="font-medium text-primary-600 hover:text-primary-500"
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                 >
-                  Forgot your password?
-                </a>
+                  {loading ? "Sending..." : "Send reset link"}
+                </button>
               </div>
-            </div>
+            </form>
+          ) : (
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-neutral-700"
+                >
+                  Email address
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  />
+                </div>
+              </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-              >
-                {loading ? "Logging in..." : "Log in"}
-              </button>
-            </div>
-          </form>
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-neutral-700"
+                >
+                  Password
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember_me"
+                    name="remember_me"
+                    type="checkbox"
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
+                  />
+                  <label
+                    htmlFor="remember_me"
+                    className="ml-2 block text-sm text-neutral-700"
+                  >
+                    Remember me
+                  </label>
+                </div>
+
+                <div className="text-sm">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="font-medium text-primary-600 hover:text-primary-500"
+                  >
+                    Forgot your password?
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                >
+                  {loading ? "Logging in..." : "Log in"}
+                </button>
+              </div>
+            </form>
+          )}
 
           <div className="mt-6">
             <div className="relative">
