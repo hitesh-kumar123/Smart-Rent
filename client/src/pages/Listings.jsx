@@ -2767,6 +2767,9 @@ const dummyProperties = [
       "https://images.unsplash.com/photo-1569430044961-e5c7504b43f9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2F2ZSUyMGhvdXNlfGVufDB8fDB8fHww&auto=format&fit=crop&w=600&q=60",
     ],
   },
+
+
+  // update
   {
     _id: "44",
     title: "Luxury Glamping Tent",
