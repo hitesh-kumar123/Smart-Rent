@@ -1,6 +1,13 @@
-const User = require('../models/user');
-const { registerSchema, loginSchema, updateUserSchema, passwordSchema } = require('../schema');
-const { cloudinary } = require('../cloudConfig');
+const User = require("../models/user");
+const {
+  registerSchema,
+  loginSchema,
+  updateUserSchema,
+  passwordSchema,
+  passwordResetRequestSchema,
+} = require("../schema");
+const { cloudinary } = require("../cloudConfig");
+const crypto = require("crypto");
 
 // @desc    Register user
 // @route   POST /api/users/register
@@ -13,12 +20,20 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const { username, email, password, firstName, lastName, phone, referralCode } = value;
+    const {
+      username,
+      email,
+      password,
+      firstName,
+      lastName,
+      phone,
+      referralCode,
+    } = value;
 
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: "User already exists" });
     }
 
     // Create user
@@ -28,7 +43,7 @@ const registerUser = async (req, res) => {
       password,
       firstName,
       lastName,
-      phone
+      phone,
     });
 
     // If referral code exists, add points to referrer
@@ -53,11 +68,11 @@ const registerUser = async (req, res) => {
       role: user.role,
       profileImage: user.profileImage,
       referralCode: user.referralCode,
-      token
+      token,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -75,25 +90,25 @@ const loginUser = async (req, res) => {
     const { email, password } = value;
 
     // Find user
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     // Check password
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     // Generate token
     const token = user.generateToken();
 
     // Set cookie
-    res.cookie('token', token, {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
     // Send response
@@ -105,11 +120,11 @@ const loginUser = async (req, res) => {
       lastName: user.lastName,
       role: user.role,
       profileImage: user.profileImage,
-      token
+      token,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -119,15 +134,15 @@ const loginUser = async (req, res) => {
 const logoutUser = async (req, res) => {
   try {
     // Clear cookie
-    res.cookie('token', '', {
+    res.cookie("token", "", {
       httpOnly: true,
-      expires: new Date(0)
+      expires: new Date(0),
     });
 
-    res.status(200).json({ message: 'Logged out successfully' });
+    res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -137,25 +152,25 @@ const logoutUser = async (req, res) => {
 const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
-      .select('-password')
+      .select("-password")
       .populate({
-        path: 'bookings',
-        options: { sort: { createdAt: -1 } }
+        path: "bookings",
+        options: { sort: { createdAt: -1 } },
       })
       .populate({
-        path: 'properties',
-        options: { sort: { createdAt: -1 } }
+        path: "properties",
+        options: { sort: { createdAt: -1 } },
       })
-      .populate('wishlist');
+      .populate("wishlist");
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json(user);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -175,29 +190,31 @@ const updateUserProfile = async (req, res) => {
       const existingUser = await User.findOne({
         $or: [
           { username: value.username, _id: { $ne: req.user._id } },
-          { email: value.email, _id: { $ne: req.user._id } }
-        ]
+          { email: value.email, _id: { $ne: req.user._id } },
+        ],
       });
 
       if (existingUser) {
-        return res.status(400).json({ message: 'Username or email already exists' });
+        return res
+          .status(400)
+          .json({ message: "Username or email already exists" });
       }
     }
 
     // Update user
     const user = await User.findByIdAndUpdate(req.user._id, value, {
       new: true,
-      runValidators: true
-    }).select('-password');
+      runValidators: true,
+    }).select("-password");
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json(user);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -215,25 +232,25 @@ const updatePassword = async (req, res) => {
     const { currentPassword, newPassword } = value;
 
     // Get user with password
-    const user = await User.findById(req.user._id).select('+password');
+    const user = await User.findById(req.user._id).select("+password");
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Check current password
     const isMatch = await user.matchPassword(currentPassword);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Current password is incorrect' });
+      return res.status(401).json({ message: "Current password is incorrect" });
     }
 
     // Update password
     user.password = newPassword;
     await user.save();
 
-    res.status(200).json({ message: 'Password updated successfully' });
+    res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -243,18 +260,18 @@ const updatePassword = async (req, res) => {
 const uploadProfileImage = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: 'No image uploaded' });
+      return res.status(400).json({ message: "No image uploaded" });
     }
 
     // Find user
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Delete previous profile image if it exists
-    if (user.profileImage && user.profileImage.includes('cloudinary')) {
-      const publicId = user.profileImage.split('/').pop().split('.')[0];
+    if (user.profileImage && user.profileImage.includes("cloudinary")) {
+      const publicId = user.profileImage.split("/").pop().split(".")[0];
       await cloudinary.uploader.destroy(`wanderlust/${publicId}`);
     }
 
@@ -263,12 +280,12 @@ const uploadProfileImage = async (req, res) => {
     await user.save();
 
     res.status(200).json({
-      message: 'Profile image uploaded successfully',
-      profileImage: user.profileImage
+      message: "Profile image uploaded successfully",
+      profileImage: user.profileImage,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -277,15 +294,15 @@ const uploadProfileImage = async (req, res) => {
 // @access  Private
 const getWishlist = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate('wishlist');
+    const user = await User.findById(req.user._id).populate("wishlist");
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json(user.wishlist);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -295,25 +312,27 @@ const getWishlist = async (req, res) => {
 const addToWishlist = async (req, res) => {
   try {
     const { propertyId } = req.params;
-    
+
     // Check if property exists in user's wishlist
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
-    
+
     if (user.wishlist.includes(propertyId)) {
-      return res.status(400).json({ message: 'Property already in wishlist' });
+      return res.status(400).json({ message: "Property already in wishlist" });
     }
-    
+
     // Add property to wishlist
     user.wishlist.push(propertyId);
     await user.save();
-    
-    res.status(200).json({ message: 'Property added to wishlist', wishlist: user.wishlist });
+
+    res
+      .status(200)
+      .json({ message: "Property added to wishlist", wishlist: user.wishlist });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -323,20 +342,75 @@ const addToWishlist = async (req, res) => {
 const removeFromWishlist = async (req, res) => {
   try {
     const { propertyId } = req.params;
-    
+
     // Remove property from wishlist
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
-    
-    user.wishlist = user.wishlist.filter(id => id.toString() !== propertyId);
+
+    user.wishlist = user.wishlist.filter((id) => id.toString() !== propertyId);
     await user.save();
-    
-    res.status(200).json({ message: 'Property removed from wishlist', wishlist: user.wishlist });
+
+    res.status(200).json({
+      message: "Property removed from wishlist",
+      wishlist: user.wishlist,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// @desc    Request password reset
+// @route   POST /api/users/reset-password
+// @access  Public
+const resetPassword = async (req, res) => {
+  try {
+    // Validate request data
+    const { error, value } = passwordResetRequestSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const { email } = value;
+
+    // Find user by email
+    const user = await User.findOne({ email });
+
+    // Don't reveal if user exists or not (security)
+    if (!user) {
+      return res
+        .status(200)
+        .json({
+          message:
+            "If your email is registered, you will receive a password reset link",
+        });
+    }
+
+    // Generate reset token valid for 1 hour
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    user.resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+    user.resetPasswordExpire = Date.now() + 3600000; // 1 hour
+
+    await user.save();
+
+    // In a production app, you would send an email with a reset link
+    // For now, we'll just return success
+
+    res.status(200).json({
+      message:
+        "If your email is registered, you will receive a password reset link",
+      // In development, return token for testing
+      resetToken:
+        process.env.NODE_ENV === "development" ? resetToken : undefined,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -350,5 +424,6 @@ module.exports = {
   uploadProfileImage,
   getWishlist,
   addToWishlist,
-  removeFromWishlist
-}; 
+  removeFromWishlist,
+  resetPassword,
+};
