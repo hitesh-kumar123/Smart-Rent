@@ -1,6 +1,25 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
+// Configure axios based on environment
+// If running with Create React App proxy, this will work for development
+const isLocalDev =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
+
+if (isLocalDev) {
+  // In local development, use relative URLs which will be proxied to the backend
+  console.log("Running in local development mode - using proxy");
+  axios.defaults.baseURL = ""; // Empty baseURL will use the proxy defined in package.json
+} else {
+  // In production, use the full URL to the backend
+  console.log("Running in production mode - using remote backend");
+  axios.defaults.baseURL = "https://srm-backend.onrender.com";
+}
+
+// Set axios to include credentials in requests
+axios.defaults.withCredentials = true;
+
 const AuthContext = createContext();
 
 export function useAuth() {
@@ -56,7 +75,9 @@ export function AuthProvider({ children }) {
       localStorage.removeItem("token");
       setCurrentUser(null);
 
+      console.log("Registering with data:", userData);
       const res = await axios.post("/api/users/register", userData);
+      console.log("Registration response:", res.data);
 
       if (res.data && res.data.token) {
         localStorage.setItem("token", res.data.token);
@@ -76,6 +97,8 @@ export function AuthProvider({ children }) {
 
       return { success: true, data: res.data };
     } catch (err) {
+      console.error("Registration error:", err);
+      console.error("Response data:", err.response?.data);
       const errorMessage = err.response?.data?.message || "Registration failed";
       setError(errorMessage);
       return { success: false, error: errorMessage };
@@ -90,7 +113,9 @@ export function AuthProvider({ children }) {
       localStorage.removeItem("token");
       setCurrentUser(null);
 
+      console.log("Logging in with:", { email });
       const res = await axios.post("/api/users/login", { email, password });
+      console.log("Login response:", res.data);
 
       if (res.data && res.data.token) {
         localStorage.setItem("token", res.data.token);
@@ -110,6 +135,8 @@ export function AuthProvider({ children }) {
 
       return { success: true, data: res.data };
     } catch (err) {
+      console.error("Login error:", err);
+      console.error("Response data:", err.response?.data);
       const errorMessage = err.response?.data?.message || "Invalid credentials";
       setError(errorMessage);
       return { success: false, error: errorMessage };
@@ -166,6 +193,20 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Reset password (forgot password)
+  const resetPassword = async (email) => {
+    try {
+      setError("");
+      const res = await axios.post("/api/users/reset-password", { email });
+      return { success: true, message: "Password reset email sent" };
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message || "Password reset request failed";
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
   const value = {
     currentUser,
     loading,
@@ -176,6 +217,7 @@ export function AuthProvider({ children }) {
     clearUserData,
     updateProfile,
     updatePassword,
+    resetPassword,
     isAuthenticated: !!currentUser,
   };
 
