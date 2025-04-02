@@ -63,6 +63,9 @@ const Wishlist = () => {
   ]);
 
   const [activeTab, setActiveTab] = useState("all");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newCollectionName, setNewCollectionName] = useState("");
+  const [collectionError, setCollectionError] = useState("");
 
   const handleRemoveFromWishlist = (collectionId, itemId) => {
     const updatedCollections = collections.map((collection) => {
@@ -78,6 +81,54 @@ const Wishlist = () => {
     setCollections(updatedCollections);
   };
 
+  // Handle opening the create collection modal
+  const handleOpenCreateModal = () => {
+    setShowCreateModal(true);
+    setNewCollectionName("");
+    setCollectionError("");
+  };
+
+  // Handle closing the create collection modal
+  const handleCloseCreateModal = () => {
+    setShowCreateModal(false);
+  };
+
+  // Handle creating a new collection
+  const handleCreateCollection = (e) => {
+    e.preventDefault();
+
+    // Validate collection name
+    if (!newCollectionName.trim()) {
+      setCollectionError("Please enter a collection name");
+      return;
+    }
+
+    // Check if collection name already exists
+    const nameExists = collections.some(
+      (collection) =>
+        collection.name.toLowerCase() === newCollectionName.toLowerCase()
+    );
+
+    if (nameExists) {
+      setCollectionError("A collection with this name already exists");
+      return;
+    }
+
+    // Create new collection
+    const newCollection = {
+      id:
+        collections.length > 0
+          ? Math.max(...collections.map((c) => c.id)) + 1
+          : 1,
+      name: newCollectionName.trim(),
+      items: [],
+    };
+
+    setCollections([...collections, newCollection]);
+    setActiveTab(newCollection.id); // Switch to the new collection
+    handleCloseCreateModal();
+  };
+
   // Get total number of saved properties
   const totalSaved = collections.reduce(
     (total, collection) => total + collection.items.length,
@@ -90,7 +141,10 @@ const Wishlist = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-neutral-800">Wishlist</h1>
 
-          <button className="text-sm font-medium text-primary-600 hover:text-primary-700">
+          <button
+            onClick={handleOpenCreateModal}
+            className="text-sm font-medium text-primary-600 hover:text-primary-700"
+          >
             Create new collection
           </button>
         </div>
@@ -227,7 +281,8 @@ const Wishlist = () => {
 
                               <div className="mt-4">
                                 <Link
-                                  to={`/listings/${item.id}`}
+                                  to="/listings"
+                                  // to={`/listings/${item.id}`}
                                   className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
                                 >
                                   View property
@@ -350,7 +405,8 @@ const Wishlist = () => {
 
                           <div className="mt-4">
                             <Link
-                              to={`/listings/${item.id}`}
+                              // to={`/listings/${item.id}`}
+                              to="/listings"
                               className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
                             >
                               View property
@@ -395,6 +451,81 @@ const Wishlist = () => {
           )}
         </div>
       </div>
+
+      {/* Create Collection Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-neutral-50 px-6 py-4 border-b border-neutral-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-neutral-900">
+                  Create new collection
+                </h3>
+                <button
+                  onClick={handleCloseCreateModal}
+                  className="text-neutral-400 hover:text-neutral-500"
+                >
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Collection Form */}
+            <form onSubmit={handleCreateCollection} className="px-6 py-4">
+              <div className="mb-4">
+                <label
+                  htmlFor="collectionName"
+                  className="block text-sm font-medium text-neutral-700 mb-2"
+                >
+                  Collection name
+                </label>
+                <input
+                  type="text"
+                  id="collectionName"
+                  value={newCollectionName}
+                  onChange={(e) => setNewCollectionName(e.target.value)}
+                  className="block w-full border border-neutral-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  placeholder="e.g., Winter Getaways, Family Trips"
+                  required
+                  autoFocus
+                />
+                {collectionError && (
+                  <p className="mt-1 text-sm text-red-600">{collectionError}</p>
+                )}
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleCloseCreateModal}
+                  className="mr-3 inline-flex items-center px-4 py-2 border border-neutral-300 text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
+                >
+                  Create collection
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
