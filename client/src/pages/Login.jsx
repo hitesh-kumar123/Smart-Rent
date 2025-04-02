@@ -2,21 +2,31 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
+/**
+ * Login Component
+ * Handles user authentication with email/password
+ * Features: Login, password reset, form validation, show/hide password
+ */
 const Login = () => {
+  // State for form data and UI controls
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
-  const [resetSent, setResetSent] = useState(false);
-  const { login, isAuthenticated, error: authError, resetPassword } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [loading, setLoading] = useState(false); // Loading state during API calls
+  const [error, setError] = useState(""); // Error message display
+  const [showForgotPassword, setShowForgotPassword] = useState(false); // Toggle between login and forgot password
+  const [resetEmail, setResetEmail] = useState(""); // Email for password reset
+  const [resetSent, setResetSent] = useState(false); // Track if reset email was sent
+  const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
+  const [rememberMe, setRememberMe] = useState(false); // Remember me checkbox state
 
-  // Redirect if they're already logged in
+  // Auth context provides login functionality and authentication state
+  const { login, isAuthenticated, error: authError, resetPassword } = useAuth();
+  const navigate = useNavigate(); // For redirecting after login
+  const location = useLocation(); // To get redirect path from location state
+
+  // Redirect if user is already logged in
   useEffect(() => {
     if (isAuthenticated) {
       const from = location.state?.from?.pathname || "/";
@@ -24,30 +34,62 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate, location]);
 
-  // Set error from auth context
+  // Set error from auth context when it changes
   useEffect(() => {
     if (authError) {
       setError(authError);
     }
   }, [authError]);
 
+  // Handle input changes for email and password fields
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  // Handle checkbox state changes
+  const handleCheckboxChange = (e) => {
+    setRememberMe(e.target.checked);
+  };
+
+  // Handle form submission for login
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    // Email validation: Check if email contains ".com" twice
+    if ((formData.email.match(/\.com/g) || []).length > 1) {
+      setError(
+        "Invalid email address. Email contains multiple '.com' domains."
+      );
+      return;
+    }
+
+    // Validate remember me checkbox must be checked
+    if (!rememberMe) {
+      setError("Please agree to the terms by checking the box.");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Attempt to login with provided credentials
       const result = await login(formData.email, formData.password);
       if (result.success) {
         // Redirect to homepage after successful login
         navigate("/", { replace: true });
       } else {
-        setError(result.error);
+        // Custom error message for invalid credentials
+        if (
+          result.error &&
+          (result.error.includes("Invalid email or password") ||
+            result.error.includes("Invalid credentials"))
+        ) {
+          setError("Password invalid");
+        } else {
+          setError(result.error);
+        }
       }
     } catch (err) {
       setError(err.message || "An error occurred. Please try again.");
@@ -56,14 +98,16 @@ const Login = () => {
     }
   };
 
+  // Handle password reset request
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
+      // Call the reset password function from auth context
       await resetPassword(resetEmail);
-      setResetSent(true);
+      setResetSent(true); // Show success message
     } catch (err) {
       setError(err.message || "Failed to send password reset email.");
     } finally {
@@ -71,12 +115,15 @@ const Login = () => {
     }
   };
 
+  // Handle email input change for password reset
   const handleResetEmailChange = (e) => {
     setResetEmail(e.target.value);
   };
 
+  // Component UI render
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      {/* Header section with title and link to register */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-neutral-900">
           {showForgotPassword
@@ -108,21 +155,26 @@ const Login = () => {
         </p>
       </div>
 
+      {/* Main form container */}
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {/* Error message display */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
 
+          {/* Success message for password reset */}
           {resetSent && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4">
               Password reset email sent. Please check your inbox.
             </div>
           )}
 
+          {/* Conditional rendering based on showForgotPassword state */}
           {showForgotPassword ? (
+            // Password reset form
             <form className="space-y-6" onSubmit={handlePasswordReset}>
               <div>
                 <label
@@ -156,7 +208,9 @@ const Login = () => {
               </div>
             </form>
           ) : (
+            // Login form
             <form className="space-y-6" onSubmit={handleSubmit}>
+              {/* Email input field */}
               <div>
                 <label
                   htmlFor="email"
@@ -178,6 +232,7 @@ const Login = () => {
                 </div>
               </div>
 
+              {/* Password input field with show/hide toggle */}
               <div>
                 <label
                   htmlFor="password"
@@ -185,26 +240,67 @@ const Login = () => {
                 >
                   Password
                 </label>
-                <div className="mt-1">
+                <div className="mt-1 relative">
                   <input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     required
                     value={formData.password}
                     onChange={handleChange}
                     className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   />
+                  {/* Show/hide password button */}
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      // Hide password icon (eye with slash)
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-gray-500"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    ) : (
+                      // Show password icon (eye)
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-gray-500"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    )}
+                  </button>
                 </div>
               </div>
 
+              {/* Remember me checkbox and forgot password link */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <input
                     id="remember_me"
                     name="remember_me"
                     type="checkbox"
+                    checked={rememberMe}
+                    onChange={handleCheckboxChange}
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
                   />
                   <label
@@ -226,6 +322,7 @@ const Login = () => {
                 </div>
               </div>
 
+              {/* Login button */}
               <div>
                 <button
                   type="submit"
@@ -238,6 +335,7 @@ const Login = () => {
             </form>
           )}
 
+          {/* Social login options section */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -250,7 +348,9 @@ const Login = () => {
               </div>
             </div>
 
+            {/* Social login buttons */}
             <div className="mt-6 grid grid-cols-2 gap-3">
+              {/* Google login button */}
               <div>
                 <a
                   href="#"
@@ -261,12 +361,29 @@ const Login = () => {
                     className="w-5 h-5"
                     viewBox="0 0 24 24"
                     fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path d="M12.545 12.151L12.545 12.151L12.545 12.151Q12.545 11.315 12.081 10.759Q11.618 10.203 10.674 10.203L10.674 10.203L10.674 10.203Q9.831 10.203 9.287 10.738Q8.742 11.272 8.742 12.151L8.742 12.151L8.742 12.151Q8.742 13.029 9.287 13.563Q9.831 14.098 10.674 14.098L10.674 14.098L10.674 14.098Q11.618 14.098 12.081 13.542Q12.545 12.986 12.545 12.151L12.545 12.151L12.545 12.151ZM10.674 16.905L10.674 16.905L10.674 16.905Q8.539 16.905 7.286 15.603Q6.033 14.301 6.033 12.151L6.033 12.151L6.033 12.151Q6.033 10 7.286 8.688Q8.539 7.376 10.674 7.376L10.674 7.376L10.674 7.376Q12.226 7.376 13.261 8.226Q14.297 9.075 14.559 10.482L14.559 10.482L14.559 10.482Q14.6 10.707 14.621 10.973Q14.642 11.24 14.642 11.486L14.642 11.486L14.642 11.486Q14.642 11.9 14.57 12.324L14.57 12.324L9.062 12.324L9.062 12.324Q9.184 13.101 9.678 13.563Q10.172 14.026 10.85 14.026L10.85 14.026L10.85 14.026Q11.436 14.026 11.829 13.798Q12.222 13.57 12.353 13.161L12.353 13.161L14.479 13.796L14.479 13.796Q14.195 14.987 13.226 15.946Q12.257 16.905 10.674 16.905L10.674 16.905L10.674 16.905ZM17.967 16.664L17.967 16.664L16.642 16.664L16.642 16.664Q16.305 16.664 16.043 16.428Q15.78 16.193 15.78 15.885L15.78 15.885L15.78 8.35L15.78 8.35Q15.78 8.001 16.043 7.765Q16.305 7.529 16.642 7.529L16.642 7.529L17.967 7.529L17.967 7.529Q18.304 7.529 18.566 7.765Q18.829 8.001 18.829 8.35L18.829 8.35L18.829 15.885L18.829 15.885Q18.829 16.193 18.566 16.428Q18.304 16.664 17.967 16.664L17.967 16.664L17.967 16.664Z" />
+                    <path
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      fill="#4285F4"
+                    />
+                    <path
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      fill="#34A853"
+                    />
+                    <path
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                      fill="#FBBC05"
+                    />
+                    <path
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      fill="#EA4335"
+                    />
                   </svg>
                 </a>
               </div>
 
+              {/* Facebook login button */}
               <div>
                 <a
                   href="#"
@@ -275,14 +392,11 @@ const Login = () => {
                   <span className="sr-only">Sign in with Facebook</span>
                   <svg
                     className="w-5 h-5"
-                    fill="currentColor"
+                    fill="#1877F2"
                     viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
-                      clipRule="evenodd"
-                    />
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
                 </a>
               </div>
