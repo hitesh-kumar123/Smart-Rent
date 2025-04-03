@@ -3,7 +3,14 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppSettings } from "../contexts/AppSettingsContext";
 import { useAuth } from "../contexts/AuthContext";
 
+/**
+ * Navbar Component
+ *
+ * Main navigation bar with responsive design for desktop
+ * Features: Logo, search, user profile menu, language/currency settings
+ */
 const Navbar = () => {
+  // State for UI controls
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,11 +61,13 @@ const Navbar = () => {
     { code: "INR", symbol: "₹", name: "Indian Rupee" },
   ];
 
+  // Close profile and settings menus on route change
   useEffect(() => {
     setIsProfileMenuOpen(false);
     setIsSettingsMenuOpen(false);
   }, [location.pathname]);
 
+  // Handle clicks outside dropdown menus to close them
   useEffect(() => {
     // Handle clicks outside the search dropdown
     const handleClickOutside = (event) => {
@@ -76,6 +85,7 @@ const Navbar = () => {
     };
   }, []);
 
+  // Control body scrolling when settings modal is open
   useEffect(() => {
     // Prevent body scrolling when settings modal is open
     if (isSettingsMenuOpen) {
@@ -90,15 +100,18 @@ const Navbar = () => {
     };
   }, [isSettingsMenuOpen]);
 
+  // Persist recent searches to localStorage
   useEffect(() => {
     // Save recent searches to localStorage whenever it changes
     localStorage.setItem("recentSearches", JSON.stringify(recentSearches));
   }, [recentSearches]);
 
+  // Handler for search input changes
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
+  // Handler for search form submission
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -115,6 +128,7 @@ const Navbar = () => {
     }
   };
 
+  // Handler for clicking a search suggestion
   const handleSuggestionClick = (suggestion) => {
     // Add to recent searches
     const updatedSearches = [
@@ -127,20 +141,24 @@ const Navbar = () => {
     setIsSearchFocused(false);
   };
 
+  // Handler to clear all recent searches
   const clearRecentSearches = () => {
     setRecentSearches([]);
   };
 
+  // Handler for changing language
   const handleLanguageChange = (langCode, langName) => {
     changeLanguage(langCode, langName);
     setIsSettingsMenuOpen(false);
   };
 
+  // Handler for changing currency
   const handleCurrencyChange = (currencyCode) => {
     changeCurrency(currencyCode);
     setIsSettingsMenuOpen(false);
   };
 
+  // Handler for user logout action
   const handleLogout = () => {
     logout();
     setIsProfileMenuOpen(false);
@@ -150,6 +168,7 @@ const Navbar = () => {
   return (
     <nav className="bg-white border-b border-neutral-200 py-4 px-4 md:px-6 sticky top-0 z-20">
       <div className="container mx-auto">
+        {/* Main navigation bar with logo and menu items */}
         <div className="flex justify-between items-center">
           {/* Logo */}
 
@@ -209,9 +228,10 @@ const Navbar = () => {
                 </button>
               </form>
 
-              {/* Search Dropdown */}
+              {/* Search Dropdown - appears when search is focused */}
               {isSearchFocused && (
                 <div className="absolute w-full mt-1 top-full left-0 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden z-20">
+                  {/* Recent Searches Section */}
                   {recentSearches.length > 0 && (
                     <div className="p-4">
                       <div className="flex items-center justify-between mb-2">
@@ -242,6 +262,7 @@ const Navbar = () => {
                     </div>
                   )}
 
+                  {/* Popular Destinations Section */}
                   <div className="p-4 border-t border-neutral-100">
                     <h3 className="text-sm font-semibold text-neutral-800">
                       Popular Destinations
@@ -268,6 +289,7 @@ const Navbar = () => {
 
           {/* Navigation - Desktop */}
           <div className="hidden md:flex items-center space-x-2">
+            {/* Become a host link */}
             <Link
               to="/host/become-a-host"
               className="text-neutral-700 hover:text-neutral-900 px-4 py-2 rounded-full text-sm font-medium"
@@ -313,6 +335,7 @@ const Navbar = () => {
                 </svg>
               </button>
 
+              {/* Language and Currency Modal */}
               {isSettingsMenuOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center animate-fadeIn">
                   <div
@@ -338,7 +361,7 @@ const Navbar = () => {
                       </div>
                     </div>
 
-                    {/* Language Selection */}
+                    {/* Language Selection Section */}
                     <div className="p-6 border-b border-neutral-200">
                       <h3 className="text-lg font-semibold text-neutral-800 mb-4">
                         Select a language
@@ -403,7 +426,7 @@ const Navbar = () => {
                       )}
                     </div>
 
-                    {/* Currency Selection */}
+                    {/* Currency Selection Section */}
                     <div className="p-6">
                       <h3 className="text-lg font-semibold text-neutral-800 mb-4">
                         Select a currency
@@ -468,7 +491,7 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* User menu */}
+            {/* User profile menu */}
             <div className="relative">
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -478,9 +501,10 @@ const Navbar = () => {
                 <i className="fas fa-bars text-neutral-500"></i>
                 {isAuthenticated && currentUser ? (
                   <div className="bg-primary-500 text-white rounded-full w-8 h-8 flex items-center justify-center overflow-hidden">
-                    {currentUser.profilePicture ? (
+                    {/* current user profile (without image display first letter of first name and last name) */}
+                    {currentUser.profileImage ? (
                       <img
-                        src={currentUser.profilePicture}
+                        src={currentUser.profileImage}
                         alt={`${currentUser.firstName} ${currentUser.lastName}`}
                         className="w-full h-full object-cover"
                       />
@@ -490,6 +514,7 @@ const Navbar = () => {
                         {currentUser.lastName?.[0]}
                       </span>
                     )}
+                    {/* if current user profile image is not available display first letter of first name and last name */}
                   </div>
                 ) : (
                   <div className="bg-neutral-500 text-white rounded-full w-8 h-8 flex items-center justify-center">
@@ -498,10 +523,11 @@ const Navbar = () => {
                 )}
               </button>
 
+              {/* User dropdown menu */}
               {isProfileMenuOpen && (
                 <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-card border border-neutral-200 divide-y divide-neutral-100 py-1 z-30">
                   {!isAuthenticated ? (
-                    // Not logged in menu
+                    // Not logged in menu options
                     <div className="py-1">
                       <Link
                         to="/login"
@@ -533,14 +559,15 @@ const Navbar = () => {
                       </Link>
                     </div>
                   ) : (
-                    // Logged in menu
+                    // Logged in user menu options
                     <>
+                      {/* User profile summary */}
                       <div className="p-4">
                         <div className="flex items-center">
                           <div className="bg-primary-500 text-white rounded-full w-10 h-10 mr-3 flex items-center justify-center overflow-hidden">
-                            {currentUser.profilePicture ? (
+                            {currentUser.profileImage ? (
                               <img
-                                src={currentUser.profilePicture}
+                                src={currentUser.profileImage}
                                 alt={`${currentUser.firstName} ${currentUser.lastName}`}
                                 className="w-full h-full object-cover"
                               />
@@ -561,6 +588,7 @@ const Navbar = () => {
                           </div>
                         </div>
                       </div>
+                      {/* User activity links */}
                       <div className="py-1">
                         <Link
                           to="/messages"
@@ -584,6 +612,7 @@ const Navbar = () => {
                           {getText("common", "wishlist")}
                         </Link>
                       </div>
+                      {/* Account management links */}
                       <div className="py-1">
                         <Link
                           to="/host/listings"
@@ -619,21 +648,10 @@ const Navbar = () => {
               )}
             </div>
           </div>
-
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-neutral-700 p-2"
-          >
-            <i
-              className={`fas ${isMenuOpen ? "fa-times" : "fa-bars"} text-lg`}
-            ></i>
-          </button>
         </div>
 
-        {/* Mobile Search - Only visible on mobile */}
-
-        <div ref={searchRef} className="mt-4 md:hidden">
+        {/* Mobile Search - Only visible on mobile - Currently disabled */}
+        {/* <div ref={searchRef} className="mt-4 md:hidden">
           <form onSubmit={handleSearchSubmit} className="w-full">
             <div className="relative rounded-full border border-neutral-200 shadow-sm">
               <input
@@ -652,193 +670,8 @@ const Navbar = () => {
               </button>
             </div>
           </form>
-
-          {/* Mobile Search Dropdown */}
-          {isSearchFocused && (
-            <div className="absolute left-0 right-0 mt-1 mx-4 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden z-20">
-              {recentSearches.length > 0 && (
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-semibold text-neutral-800">
-                      Recent Searches
-                    </h3>
-                    <button
-                      onClick={clearRecentSearches}
-                      className="text-xs text-neutral-500 hover:text-neutral-700"
-                    >
-                      Clear all
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    {recentSearches.map((search, index) => (
-                      <div
-                        key={index}
-                        onClick={() => handleSuggestionClick(search)}
-                        className="flex items-center p-2 hover:bg-neutral-50 rounded-md cursor-pointer"
-                      >
-                        <i className="fas fa-history text-neutral-400 mr-3"></i>
-                        <span className="text-sm text-neutral-700">
-                          {search}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="p-4 border-t border-neutral-100">
-                <h3 className="text-sm font-semibold text-neutral-800 mb-2">
-                  Popular Destinations
-                </h3>
-                <div className="space-y-2">
-                  {suggestions.map((suggestion, index) => (
-                    <div
-                      key={index}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="flex items-center p-2 hover:bg-neutral-50 rounded-md cursor-pointer"
-                    >
-                      <i className="fas fa-map-marker-alt text-neutral-400 mr-3"></i>
-                      <span className="text-sm text-neutral-700">
-                        {suggestion}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        </div> */}
       </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden mt-4 px-2 pt-2 pb-4 space-y-1 border-t border-neutral-200">
-          {!isAuthenticated ? (
-            <>
-              <Link
-                to="/login"
-                className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-50"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {getText("common", "login")}
-              </Link>
-              <Link
-                to="/register"
-                className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-50"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {getText("common", "signup")}
-              </Link>
-            </>
-          ) : (
-            <>
-              <div className="px-3 py-2 text-base font-medium text-neutral-700">
-                Hello, {currentUser.firstName}
-              </div>
-              <Link
-                to="/messages"
-                className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-50"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {getText("common", "messages")}
-              </Link>
-              <Link
-                to="/trips"
-                className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-50"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {getText("common", "trips")}
-              </Link>
-              <Link
-                to="/account"
-                className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-50"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {getText("common", "account")}
-              </Link>
-              <button
-                className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-50"
-                onClick={handleLogout}
-              >
-                {getText("common", "logout")}
-              </button>
-              <Link
-                to="/help"
-                className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-50"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {getText("common", "help")}
-              </Link>
-            </>
-          )}
-          <Link
-            to="/listings"
-            className="block px-3 py-2 rounded-md text-base font-medium bg-primary-500 text-white hover:bg-primary-600"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <div className="flex items-center">
-              <i className="fas fa-compass mr-2"></i>
-              Explore
-            </div>
-          </Link>
-          <Link
-            to="/host/become-a-host"
-            className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-50"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            {getText("common", "becomeHost")}
-          </Link>
-          {!isAuthenticated && (
-            <Link
-              to="/help"
-              className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {getText("common", "help")}
-            </Link>
-          )}
-          <button
-            onClick={() => {
-              setIsSettingsMenuOpen(true);
-              setIsMenuOpen(false);
-            }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-50"
-          >
-            <div className="flex items-center">
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M2 12H22"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="ml-2">Language & Currency</span>
-            </div>
-          </button>
-        </div>
-      )}
     </nav>
   );
 };
