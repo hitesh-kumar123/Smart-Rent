@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Messages from "./pages/Messages";
 import Trips from "./pages/Trips";
+import TripManage from "./pages/TripManage";
 import Wishlist from "./pages/Wishlist";
 import HostListings from "./pages/HostListings";
 import Account from "./pages/Account";
@@ -115,6 +116,16 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Trips />
+                  </ProtectedRoute>
+                }
+              />
+
+              
+              <Route
+                path="/trips/:id/manage"
+                element={
+                  <ProtectedRoute>
+                    <TripManage />
                   </ProtectedRoute>
                 }
               />
