@@ -62,11 +62,13 @@ const Wishlist = () => {
     },
   ]);
 
+  // States for managing active tab, modal visibility, and form data
   const [activeTab, setActiveTab] = useState("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
   const [collectionError, setCollectionError] = useState("");
 
+  // Function to remove a property from a wishlist collection
   const handleRemoveFromWishlist = (collectionId, itemId) => {
     const updatedCollections = collections.map((collection) => {
       if (collection.id === collectionId) {
@@ -138,6 +140,7 @@ const Wishlist = () => {
   return (
     <div className="min-h-screen bg-neutral-50 py-8">
       <div className="container mx-auto px-4">
+        {/* Wishlist header with title and create collection button */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-neutral-800">Wishlist</h1>
 
@@ -152,6 +155,7 @@ const Wishlist = () => {
         {/* Tabs */}
         <div className="border-b border-neutral-200 mb-6">
           <nav className="-mb-px flex space-x-8">
+            {/* All properties tab */}
             <button
               onClick={() => setActiveTab("all")}
               className={`pb-4 px-1 border-b-2 font-medium text-sm ${
@@ -166,6 +170,7 @@ const Wishlist = () => {
               </span>
             </button>
 
+            {/* Collection tabs - one for each collection */}
             {collections.map((collection) => (
               <button
                 key={collection.id}
@@ -194,6 +199,7 @@ const Wishlist = () => {
                 (collection) =>
                   collection.items.length > 0 && (
                     <div key={collection.id}>
+                      {/* Collection title and view all link */}
                       <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-semibold text-neutral-800">
                           {collection.name}
@@ -206,12 +212,14 @@ const Wishlist = () => {
                         </Link>
                       </div>
 
+                      {/* Property cards grid layout */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {collection.items.map((item) => (
                           <div
                             key={item.id}
                             className="bg-white rounded-lg shadow-sm overflow-hidden"
                           >
+                            {/* Property image and remove button */}
                             <div className="relative">
                               <img
                                 src={item.image}
@@ -241,7 +249,9 @@ const Wishlist = () => {
                               </button>
                             </div>
 
+                            {/* Property details */}
                             <div className="p-4">
+                              {/* Rating and reviews */}
                               <div className="flex items-center mb-1">
                                 <svg
                                   className="h-4 w-4 text-primary-500"
@@ -258,20 +268,24 @@ const Wishlist = () => {
                                 </span>
                               </div>
 
+                              {/* Property title */}
                               <h3 className="font-medium text-neutral-900 mb-1">
                                 {item.title}
                               </h3>
 
+                              {/* Property location */}
                               <p className="text-sm text-neutral-500 mb-2">
                                 {item.location}
                               </p>
 
+                              {/* Property beds and baths info */}
                               <p className="text-sm text-neutral-700 mb-2">
                                 {item.beds} {item.beds === 1 ? "bed" : "beds"} ·{" "}
                                 {item.baths}{" "}
                                 {item.baths === 1 ? "bath" : "baths"}
                               </p>
 
+                              {/* Property price */}
                               <p className="font-medium text-neutral-900">
                                 {item.price}{" "}
                                 <span className="text-neutral-500 font-normal">
@@ -279,6 +293,7 @@ const Wishlist = () => {
                                 </span>
                               </p>
 
+                              {/* View property button */}
                               <div className="mt-4">
                                 <Link
                                   to="/listings"
@@ -287,6 +302,7 @@ const Wishlist = () => {
                                 >
                                   View property
                                 </Link>
+                                {/* Property card button section - links to individual listing detail page */}
                               </div>
                             </div>
                           </div>
@@ -296,6 +312,7 @@ const Wishlist = () => {
                   )
               )}
 
+              {/* Empty state when no properties are saved */}
               {totalSaved === 0 && (
                 <div className="text-center py-12">
                   <svg
@@ -340,6 +357,7 @@ const Wishlist = () => {
                         key={item.id}
                         className="bg-white rounded-lg shadow-sm overflow-hidden"
                       >
+                        {/* Property image and remove button */}
                         <div className="relative">
                           <img
                             src={item.image}
@@ -366,7 +384,9 @@ const Wishlist = () => {
                           </button>
                         </div>
 
+                        {/* Property details */}
                         <div className="p-4">
+                          {/* Rating and reviews */}
                           <div className="flex items-center mb-1">
                             <svg
                               className="h-4 w-4 text-primary-500"
@@ -383,19 +403,23 @@ const Wishlist = () => {
                             </span>
                           </div>
 
+                          {/* Property title */}
                           <h3 className="font-medium text-neutral-900 mb-1">
                             {item.title}
                           </h3>
 
+                          {/* Property location */}
                           <p className="text-sm text-neutral-500 mb-2">
                             {item.location}
                           </p>
 
+                          {/* Property beds and baths info */}
                           <p className="text-sm text-neutral-700 mb-2">
                             {item.beds} {item.beds === 1 ? "bed" : "beds"} ·{" "}
                             {item.baths} {item.baths === 1 ? "bath" : "baths"}
                           </p>
 
+                          {/* Property price */}
                           <p className="font-medium text-neutral-900">
                             {item.price}{" "}
                             <span className="text-neutral-500 font-normal">
@@ -403,6 +427,7 @@ const Wishlist = () => {
                             </span>
                           </p>
 
+                          {/* View property button */}
                           <div className="mt-4">
                             <Link
                               // to={`/listings/${item.id}`}
@@ -418,6 +443,7 @@ const Wishlist = () => {
                 </div>
               ) : (
                 <div className="text-center py-12">
+                  {/* Empty state for collection with no properties */}
                   <svg
                     className="mx-auto h-12 w-12 text-neutral-400"
                     fill="none"
@@ -502,11 +528,13 @@ const Wishlist = () => {
                   required
                   autoFocus
                 />
+                {/* Error message displayed when validation fails */}
                 {collectionError && (
                   <p className="mt-1 text-sm text-red-600">{collectionError}</p>
                 )}
               </div>
 
+              {/* Form buttons */}
               <div className="flex justify-end">
                 <button
                   type="button"
