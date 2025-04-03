@@ -181,6 +181,7 @@ export function AuthProvider({ children }) {
       const formData = new FormData();
       formData.append("profileImage", file);
 
+      console.log("Uploading profile image...");
       const res = await axios.post("/api/users/profile/image", formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -188,16 +189,55 @@ export function AuthProvider({ children }) {
         },
       });
 
+      console.log("Profile image upload response:", res.data);
+
       if (res.data && res.data.profileImage) {
+        // Add timestamp to force refresh of image
+        const profileImageUrl = res.data.profileImage.includes("?")
+          ? res.data.profileImage
+          : `${res.data.profileImage}?t=${new Date().getTime()}`;
+
+        console.log("Setting profile image to:", profileImageUrl);
+
         setCurrentUser((prevUser) => ({
           ...prevUser,
-          profileImage: res.data.profileImage,
+          profileImage: profileImageUrl,
+        }));
+
+        return { success: true, profileImage: profileImageUrl };
+      } else {
+        console.error("Invalid response format from server:", res.data);
+        return { success: false, error: "Invalid response from server" };
+      }
+    } catch (err) {
+      console.error("Error in updateProfileImage:", err);
+      const errorMessage = err.response?.data?.message || "Image upload failed";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  // Remove profile image
+  const removeProfileImage = async () => {
+    try {
+      setError("");
+      const res = await axios.delete("/api/users/profile/image", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (res.data && res.data.success) {
+        setCurrentUser((prevUser) => ({
+          ...prevUser,
+          profileImage: "",
         }));
       }
 
-      return { success: true, profileImage: res.data.profileImage };
+      return { success: true };
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "Image upload failed";
+      const errorMessage =
+        err.response?.data?.message || "Failed to remove profile image";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
@@ -295,6 +335,7 @@ export function AuthProvider({ children }) {
     resetPassword,
     socialLogin,
     updateProfileImage,
+    removeProfileImage,
     isAuthenticated: !!currentUser,
   };
 
