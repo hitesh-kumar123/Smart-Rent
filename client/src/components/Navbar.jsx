@@ -492,6 +492,7 @@ const Navbar = () => {
             </div>
 
             {/* User profile menu */}
+
             <div className="relative">
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -501,12 +502,16 @@ const Navbar = () => {
                 <i className="fas fa-bars text-neutral-500"></i>
                 {isAuthenticated && currentUser ? (
                   <div className="bg-primary-500 text-white rounded-full w-8 h-8 flex items-center justify-center overflow-hidden">
-                    {/* current user profile (without image display first letter of first name and last name) */}
                     {currentUser.profileImage ? (
                       <img
                         src={currentUser.profileImage}
                         alt={`${currentUser.firstName} ${currentUser.lastName}`}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.onerror = null;
+                          e.target.style.display = "none";
+                          e.target.parentNode.innerHTML = `<span class="text-sm font-medium">${currentUser.firstName?.[0]}${currentUser.lastName?.[0]}</span>`;
+                        }}
                       />
                     ) : (
                       <span className="text-sm font-medium">
@@ -514,7 +519,6 @@ const Navbar = () => {
                         {currentUser.lastName?.[0]}
                       </span>
                     )}
-                    {/* if current user profile image is not available display first letter of first name and last name */}
                   </div>
                 ) : (
                   <div className="bg-neutral-500 text-white rounded-full w-8 h-8 flex items-center justify-center">
@@ -570,6 +574,11 @@ const Navbar = () => {
                                 src={currentUser.profileImage}
                                 alt={`${currentUser.firstName} ${currentUser.lastName}`}
                                 className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.onerror = null;
+                                  e.target.style.display = "none";
+                                  e.target.parentNode.innerHTML = `<span class="text-sm font-medium">${currentUser.firstName?.[0]}${currentUser.lastName?.[0]}</span>`;
+                                }}
                               />
                             ) : (
                               <span className="text-sm font-medium">
