@@ -207,6 +207,52 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Social login (Google, Facebook)
+  const socialLogin = async (provider) => {
+    try {
+      setError("");
+
+      if (provider === "google") {
+        // Google OAuth configuration
+        const googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+        const redirectUri = window.location.origin + "/auth/google/callback";
+
+        const params = new URLSearchParams({
+          client_id:
+            process.env.REACT_APP_GOOGLE_CLIENT_ID || "your-google-client-id",
+          redirect_uri: redirectUri,
+          response_type: "code",
+          scope: "email profile",
+          prompt: "select_account",
+        });
+
+        // Redirect to Google login
+        window.location.href = `${googleAuthUrl}?${params.toString()}`;
+      } else if (provider === "facebook") {
+        // Facebook OAuth configuration
+        const fbAuthUrl = "https://www.facebook.com/v12.0/dialog/oauth";
+        const redirectUri = window.location.origin + "/auth/facebook/callback";
+
+        const params = new URLSearchParams({
+          client_id:
+            process.env.REACT_APP_FACEBOOK_APP_ID || "your-facebook-app-id",
+          redirect_uri: redirectUri,
+          response_type: "code",
+          scope: "email,public_profile",
+        });
+
+        // Redirect to Facebook login
+        window.location.href = `${fbAuthUrl}?${params.toString()}`;
+      }
+
+      return { success: true };
+    } catch (err) {
+      const errorMessage = `${provider} login failed`;
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
+
   const value = {
     currentUser,
     loading,
@@ -218,6 +264,7 @@ export function AuthProvider({ children }) {
     updateProfile,
     updatePassword,
     resetPassword,
+    socialLogin,
     isAuthenticated: !!currentUser,
   };
 
