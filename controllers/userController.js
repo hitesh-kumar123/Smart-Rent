@@ -289,6 +289,38 @@ const uploadProfileImage = async (req, res) => {
   }
 };
 
+// @desc    Delete profile image
+// @route   DELETE /api/users/profile/image
+// @access  Private
+const deleteProfileImage = async (req, res) => {
+  try {
+    // Find user
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete profile image from Cloudinary if it exists
+    if (user.profileImage && user.profileImage.includes("cloudinary")) {
+      const publicId = user.profileImage.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(`wanderlust/${publicId}`);
+    }
+
+    // Reset to default avatar
+    user.profileImage =
+      "https://res.cloudinary.com/dyem5b45p/image/upload/v1624917250/wanderlust/default-avatar_gjqyxn.png";
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile image removed successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 // @desc    Get user wishlist
 // @route   GET /api/users/wishlist
 // @access  Private
@@ -420,6 +452,7 @@ module.exports = {
   updateUserProfile,
   updatePassword,
   uploadProfileImage,
+  deleteProfileImage,
   getWishlist,
   addToWishlist,
   removeFromWishlist,
