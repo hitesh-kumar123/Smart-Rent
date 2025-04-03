@@ -380,12 +380,10 @@ const resetPassword = async (req, res) => {
 
     // Don't reveal if user exists or not (security)
     if (!user) {
-      return res
-        .status(200)
-        .json({
-          message:
-            "If your email is registered, you will receive a password reset link",
-        });
+      return res.status(200).json({
+        message:
+          "If your email is registered, you will receive a password reset link",
+      });
     }
 
     // Generate reset token valid for 1 hour
