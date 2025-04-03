@@ -174,6 +174,35 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Update profile image
+  const updateProfileImage = async (file) => {
+    try {
+      setError("");
+      const formData = new FormData();
+      formData.append("profileImage", file);
+
+      const res = await axios.post("/api/users/profile/image", formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.data && res.data.profileImage) {
+        setCurrentUser((prevUser) => ({
+          ...prevUser,
+          profileImage: res.data.profileImage,
+        }));
+      }
+
+      return { success: true, profileImage: res.data.profileImage };
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || "Image upload failed";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
+
   // Update password
   const updatePassword = async (passwordData) => {
     try {
@@ -265,6 +294,7 @@ export function AuthProvider({ children }) {
     updatePassword,
     resetPassword,
     socialLogin,
+    updateProfileImage,
     isAuthenticated: !!currentUser,
   };
 
