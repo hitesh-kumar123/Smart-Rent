@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const Account = () => {
   const [activeTab, setActiveTab] = useState("profile");
-  const { currentUser, logout, updateProfile } = useAuth();
+  const { currentUser, logout, updateProfile, updateProfileImage } = useAuth();
   const navigate = useNavigate();
 
   // Default form state from currentUser
@@ -21,7 +21,7 @@ const Account = () => {
       zipCode: "",
       country: "",
     },
-    profilePicture: "https://randomuser.me/api/portraits/men/32.jpg",
+    profileImage: "",
   });
 
   // Update userData when currentUser changes
@@ -40,9 +40,7 @@ const Account = () => {
           zipCode: currentUser.address?.zipCode || "",
           country: currentUser.address?.country || "",
         },
-        profilePicture:
-          currentUser.profileImage ||
-          "https://randomuser.me/api/portraits/men/32.jpg",
+        profileImage: currentUser.profileImage || "",
       });
     }
   }, [currentUser]);
@@ -164,13 +162,63 @@ const Account = () => {
           <div className="w-full md:w-64 shrink-0">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden sticky top-8">
               <div className="p-6 text-center border-b border-neutral-200">
+                {/* if userData.profileImage is available display userData.profileImage */}
                 <div className="relative w-24 h-24 mx-auto mb-4">
-                  <img
-                    src={userData.profilePicture}
-                    alt={`${userData.firstName} ${userData.lastName}`}
-                    className="rounded-full object-cover w-full h-full"
-                  />
-                  <button className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-sm border border-neutral-200 text-primary-500 hover:text-primary-600">
+                  {/* if userData.profileImage is available display userData.profileImage */}
+                  {userData.profileImage ? (
+                    <img
+                      src={userData.profileImage}
+                      alt={`${userData.firstName} ${userData.lastName}`}
+                      className="rounded-full object-cover w-full h-full"
+                    />
+                  ) : (
+                    <div className="rounded-full w-full h-full bg-primary-500 text-white flex items-center justify-center text-xl font-medium">
+                      {userData.firstName?.[0]}
+                      {userData.lastName?.[0]}
+                    </div>
+                  )}
+
+                  {/* Upload button */}
+                  <button
+                    onClick={() =>
+                      document.getElementById("profilePicUpload").click()
+                    }
+                    className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-sm border border-neutral-200 text-primary-500 hover:text-primary-600"
+                  >
+                    <input
+                      type="file"
+                      id="profilePicUpload"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          // Create temporary URL for preview
+                          const previewUrl = URL.createObjectURL(file);
+                          setUserData((prev) => ({
+                            ...prev,
+                            profileImage: previewUrl,
+                          }));
+
+                          // Use AuthContext function to upload
+                          updateProfileImage(file)
+                            .then((result) => {
+                              if (!result.success) {
+                                console.error(
+                                  "Error uploading profile image:",
+                                  result.error
+                                );
+                              }
+                            })
+                            .catch((err) => {
+                              console.error(
+                                "Error uploading profile image:",
+                                err
+                              );
+                            });
+                        }
+                      }}
+                    />
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
@@ -193,6 +241,7 @@ const Account = () => {
                     </svg>
                   </button>
                 </div>
+
                 <h2 className="text-lg font-medium text-neutral-900">
                   {userData.firstName} {userData.lastName}
                 </h2>
@@ -462,7 +511,7 @@ const Account = () => {
                                   fill="currentColor"
                                 >
                                   <path d="M44 0H4C1.8 0 0 1.8 0 4v24c0 2.2 1.8 4 4 4h40c2.2 0 4-1.8 4-4V4c0-2.2-1.8-4-4-4zm0 28H4V4h40v24z" />
-                                  <path d="M13 15.1l2.8-6.8h2L15.1 16h-2.1l-2.7-7.7h2l.7 7.8zm7.6 1.2c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3zm0-4.3c-.7 0-1.3.6-1.3 1.3s.6 1.3 1.3 1.3 1.3-.6 1.3-1.3-.6-1.3-1.3-1.3zm7 4.3c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3zm0-4.3c-.7 0-1.3.6-1.3 1.3s.6 1.3 1.3 1.3 1.3-.6 1.3-1.3-.6-1.3-1.3-1.3zm7.1 4.3c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3c0 1.6-1.4 3-3 3zm0-4.3c-.7 0-1.3.6-1.3 1.3s.6 1.3 1.3 1.3 1.3-.6 1.3-1.3-.6-1.3-1.3-1.3z" />
+                                  <path d="M13 15.1l2.8-6.8h2L15.1 16h-2.1l-2.7-7.7h2l.7 7.8zm7.6 1.2c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3zm0-4.3c-.7 0-1.3.6-1.3 1.3s.6 1.3 1.3 1.3 1.3-.6 1.3-1.3-.6-1.3-1.3-1.3zm7 4.3c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3c0 1.6-1.4 3-3 3zm0-4.3c-.7 0-1.3.6-1.3 1.3s.6 1.3 1.3 1.3 1.3-.6 1.3-1.3-.6-1.3-1.3-1.3z" />
                                 </svg>
                               )}
 
