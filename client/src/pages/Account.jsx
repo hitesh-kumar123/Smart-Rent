@@ -168,7 +168,6 @@ const Account = () => {
           <div className="w-full md:w-64 shrink-0">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden sticky top-8">
               <div className="p-6 text-center border-b border-neutral-200">
-                
                 <div className="relative w-24 h-24 mx-auto mb-4">
                   {/* Display profile image or initials */}
                   {userData.profileImage ? (
@@ -176,6 +175,16 @@ const Account = () => {
                       src={userData.profileImage}
                       alt={`${userData.firstName} ${userData.lastName}`}
                       className="rounded-full object-cover w-24 h-24"
+                      onError={(e) => {
+                        e.onerror = null;
+                        e.target.style.display = "none";
+                        const parent = e.target.parentNode;
+                        const initials = document.createElement("div");
+                        initials.className =
+                          "rounded-full w-full h-full bg-primary-500 text-white flex items-center justify-center text-xl font-medium";
+                        initials.innerHTML = `${userData.firstName?.[0]}${userData.lastName?.[0]}`;
+                        parent.appendChild(initials);
+                      }}
                     />
                   ) : (
                     <div className="rounded-full w-full h-full bg-primary-500 text-white flex items-center justify-center text-xl font-medium">
@@ -185,8 +194,10 @@ const Account = () => {
                   )}
 
                   {/* Show either upload or delete button based on whether an image exists */}
-                  {userData.profileImage ? (
-                    /* Delete button - shown only when profile image exists */
+                  {userData.profileImage &&
+                  userData.profileImage !==
+                    "https://res.cloudinary.com/dyem5b45p/image/upload/v1624917250/wanderlust/default-avatar_gjqyxn.png" ? (
+                    /* Delete button - shown only when profile image exists and is not the default image */
                     <button
                       onClick={() => {
                         if (
@@ -235,7 +246,7 @@ const Account = () => {
                       </svg>
                     </button>
                   ) : (
-                    /* Upload button - shown only when no profile image exists */
+                    /* Upload button - shown when no profile image exists or it's the default image */
                     <button
                       onClick={() =>
                         document.getElementById("profilePicUpload").click()
@@ -261,10 +272,45 @@ const Account = () => {
                             // Use AuthContext function to upload
                             updateProfileImage(file)
                               .then((result) => {
-                                if (!result.success) {
+                                if (result.success) {
+                                  console.log(
+                                    "Profile image uploaded successfully:",
+                                    result.profileImage
+                                  );
+
+                                  // Force image reload to prevent cache issues
+                                  const img = new Image();
+                                  img.src =
+                                    result.profileImage +
+                                    "?t=" +
+                                    new Date().getTime();
+
+                                  // Update userData with the actual image URL from server
+                                  setUserData((prev) => ({
+                                    ...prev,
+                                    profileImage: result.profileImage,
+                                  }));
+
+                                  // Force re-render to update the UI
+                                  setTimeout(() => {
+                                    const profileImg = document.querySelector(
+                                      ".rounded-full.object-cover.w-24.h-24"
+                                    );
+                                    if (profileImg) {
+                                      profileImg.src =
+                                        result.profileImage +
+                                        "?t=" +
+                                        new Date().getTime();
+                                    }
+                                  }, 500);
+                                } else {
                                   console.error(
                                     "Error uploading profile image:",
                                     result.error
+                                  );
+                                  alert(
+                                    "Failed to upload profile image: " +
+                                      result.error
                                   );
                                 }
                               })
@@ -272,6 +318,9 @@ const Account = () => {
                                 console.error(
                                   "Error uploading profile image:",
                                   err
+                                );
+                                alert(
+                                  "An error occurred while uploading profile image"
                                 );
                               });
                           }
@@ -791,15 +840,182 @@ const Account = () => {
                 </div>
               )}
 
-              {/* Placeholder for other tabs */}
+              {/* Notifications tab */}
               {activeTab === "notifications" && (
                 <div className="p-6">
                   <h2 className="text-xl font-semibold text-neutral-900 mb-6">
                     Notification Preferences
                   </h2>
-                  <p className="text-sm text-neutral-500">
-                    Configure what types of notifications you want to receive.
-                  </p>
+
+                  {/* Email Notifications Section */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-medium text-neutral-900 mb-4">
+                      Email Notifications
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-neutral-200">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Booking confirmations
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Receive emails when your booking is confirmed
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            defaultChecked
+                          />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center justify-between py-3 border-b border-neutral-200">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Booking reminders
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Receive reminder emails before your scheduled
+                            bookings
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            defaultChecked
+                          />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center justify-between py-3 border-b border-neutral-200">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Messages
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Receive emails when you get new messages
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            defaultChecked
+                          />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center justify-between py-3 border-b border-neutral-200">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Promotions and tips
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Receive emails about promotions, discounts and
+                            travel tips
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" className="sr-only peer" />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center justify-between py-3">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Account updates
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Receive important updates about your account and our
+                            service
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            defaultChecked
+                          />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Push Notifications Section */}
+                  <div>
+                    <h3 className="text-lg font-medium text-neutral-900 mb-4">
+                      Push Notifications
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-neutral-200">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Booking updates
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Receive notifications about your bookings status
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            defaultChecked
+                          />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center justify-between py-3 border-b border-neutral-200">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Messages
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Receive notifications for new messages
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            defaultChecked
+                          />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center justify-between py-3">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Special offers
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Receive notifications about special offers and
+                            discounts
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" className="sr-only peer" />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 flex justify-end">
+                    <button className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                      Save preferences
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -808,9 +1024,153 @@ const Account = () => {
                   <h2 className="text-xl font-semibold text-neutral-900 mb-6">
                     Privacy Settings
                   </h2>
-                  <p className="text-sm text-neutral-500">
-                    Manage your privacy settings and data sharing preferences.
-                  </p>
+
+                  {/* Data Sharing Section */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-medium text-neutral-900 mb-4">
+                      Data Sharing & Personalization
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-neutral-200">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Personalized recommendations
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Allow us to use your browsing history and
+                            preferences to show personalized recommendations
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            defaultChecked
+                          />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center justify-between py-3 border-b border-neutral-200">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Analytics cookies
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Allow us to collect analytics data to improve our
+                            services
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            defaultChecked
+                          />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center justify-between py-3 border-b border-neutral-200">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Third-party data sharing
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Allow us to share anonymized data with trusted third
+                            parties
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" className="sr-only peer" />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Profile Visibility Section */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-medium text-neutral-900 mb-4">
+                      Profile Visibility
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3 border-b border-neutral-200">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Show my profile to
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Control who can see your profile information
+                          </p>
+                        </div>
+                        <select className="bg-white border border-neutral-300 text-neutral-700 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5">
+                          <option value="everyone">Everyone</option>
+                          <option value="hosts">Only hosts I book with</option>
+                          <option value="nobody">Nobody</option>
+                        </select>
+                      </div>
+
+                      <div className="flex items-center justify-between py-3 border-b border-neutral-200">
+                        <div>
+                          <h4 className="text-sm font-medium text-neutral-900">
+                            Show activity status
+                          </h4>
+                          <p className="text-xs text-neutral-500">
+                            Let others see when you're online
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            defaultChecked
+                          />
+                          <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Data Management Section */}
+                  <div>
+                    <h3 className="text-lg font-medium text-neutral-900 mb-4">
+                      Data Management
+                    </h3>
+                    <div className="space-y-6">
+                      <div className="border border-neutral-200 rounded-lg p-4">
+                        <h4 className="text-sm font-medium text-neutral-900 mb-2">
+                          Download your data
+                        </h4>
+                        <p className="text-xs text-neutral-500 mb-4">
+                          Get a copy of all the personal data we have stored for
+                          your account.
+                        </p>
+                        <button className="text-sm bg-neutral-100 hover:bg-neutral-200 text-neutral-700 py-2 px-4 rounded">
+                          Request data export
+                        </button>
+                      </div>
+
+                      <div className="border border-neutral-200 rounded-lg p-4">
+                        <h4 className="text-sm font-medium text-neutral-900 mb-2">
+                          Delete your account
+                        </h4>
+                        <p className="text-xs text-neutral-500 mb-4">
+                          Permanently delete your account and all associated
+                          data. This action cannot be undone.
+                        </p>
+                        <button className="text-sm bg-red-100 hover:bg-red-200 text-red-700 py-2 px-4 rounded">
+                          Delete account
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 flex justify-end">
+                    <button className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                      Save privacy settings
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
