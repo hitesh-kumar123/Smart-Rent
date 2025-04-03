@@ -4,7 +4,13 @@ import { useNavigate } from "react-router-dom";
 
 const Account = () => {
   const [activeTab, setActiveTab] = useState("profile");
-  const { currentUser, logout, updateProfile, updateProfileImage } = useAuth();
+  const {
+    currentUser,
+    logout,
+    updateProfile,
+    updateProfileImage,
+    removeProfileImage,
+  } = useAuth();
   const navigate = useNavigate();
 
   // Default form state from currentUser
@@ -162,14 +168,14 @@ const Account = () => {
           <div className="w-full md:w-64 shrink-0">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden sticky top-8">
               <div className="p-6 text-center border-b border-neutral-200">
-                {/* if userData.profileImage is available display userData.profileImage */}
+                
                 <div className="relative w-24 h-24 mx-auto mb-4">
-                  {/* if userData.profileImage is available display userData.profileImage */}
+                  {/* Display profile image or initials */}
                   {userData.profileImage ? (
                     <img
                       src={userData.profileImage}
                       alt={`${userData.firstName} ${userData.lastName}`}
-                      className="rounded-full object-cover w-full h-full"
+                      className="rounded-full object-cover w-24 h-24"
                     />
                   ) : (
                     <div className="rounded-full w-full h-full bg-primary-500 text-white flex items-center justify-center text-xl font-medium">
@@ -178,68 +184,121 @@ const Account = () => {
                     </div>
                   )}
 
-                  {/* Upload button */}
-                  <button
-                    onClick={() =>
-                      document.getElementById("profilePicUpload").click()
-                    }
-                    className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-sm border border-neutral-200 text-primary-500 hover:text-primary-600"
-                  >
-                    <input
-                      type="file"
-                      id="profilePicUpload"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          // Create temporary URL for preview
-                          const previewUrl = URL.createObjectURL(file);
-                          setUserData((prev) => ({
-                            ...prev,
-                            profileImage: previewUrl,
-                          }));
-
-                          // Use AuthContext function to upload
-                          updateProfileImage(file)
+                  {/* Show either upload or delete button based on whether an image exists */}
+                  {userData.profileImage ? (
+                    /* Delete button - shown only when profile image exists */
+                    <button
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Are you sure you want to remove your profile image?"
+                          )
+                        ) {
+                          removeProfileImage()
                             .then((result) => {
-                              if (!result.success) {
+                              if (result.success) {
+                                setUserData((prev) => ({
+                                  ...prev,
+                                  profileImage: "",
+                                }));
+                              } else {
                                 console.error(
-                                  "Error uploading profile image:",
+                                  "Error removing profile image:",
                                   result.error
                                 );
                               }
                             })
                             .catch((err) => {
                               console.error(
-                                "Error uploading profile image:",
+                                "Error removing profile image:",
                                 err
                               );
                             });
                         }
                       }}
-                    />
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                      className="absolute bottom-0 right-0 bg-red-500 text-white rounded-full p-1.5 shadow-md border-2 border-white text-xs hover:bg-red-600 transition-all"
+                      title="Remove profile image"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
+                  ) : (
+                    /* Upload button - shown only when no profile image exists */
+                    <button
+                      onClick={() =>
+                        document.getElementById("profilePicUpload").click()
+                      }
+                      className="absolute bottom-0 right-0 bg-white rounded-full p-1.5 shadow-md border-2 border-white text-primary-500 hover:text-primary-600 transition-all"
+                      title="Upload profile image"
+                    >
+                      <input
+                        type="file"
+                        id="profilePicUpload"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            // Create temporary URL for preview
+                            const previewUrl = URL.createObjectURL(file);
+                            setUserData((prev) => ({
+                              ...prev,
+                              profileImage: previewUrl,
+                            }));
+
+                            // Use AuthContext function to upload
+                            updateProfileImage(file)
+                              .then((result) => {
+                                if (!result.success) {
+                                  console.error(
+                                    "Error uploading profile image:",
+                                    result.error
+                                  );
+                                }
+                              })
+                              .catch((err) => {
+                                console.error(
+                                  "Error uploading profile image:",
+                                  err
+                                );
+                              });
+                          }
+                        }}
                       />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                  </button>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    </button>
+                  )}
                 </div>
 
                 <h2 className="text-lg font-medium text-neutral-900">
