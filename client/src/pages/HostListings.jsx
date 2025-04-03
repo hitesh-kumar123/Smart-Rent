@@ -390,12 +390,12 @@ const HostListings = () => {
                         </button>
 
                         {/* Edit listing button */}
-                        <Link
+                        {/* <Link
                           to={`/host/edit-listing/${listing.id}`}
                           className="inline-flex items-center px-3 py-1.5 border border-neutral-300 text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50"
                         >
                           Edit
-                        </Link>
+                        </Link> */}
 
                         {/* Delete listing button */}
                         <button
