@@ -20,6 +20,11 @@ router.post(
   upload.single("profileImage"),
   userController.uploadProfileImage
 );
+router.delete(
+  "/profile/image",
+  authenticate,
+  userController.deleteProfileImage
+);
 
 // Wishlist routes
 router.get("/wishlist", authenticate, userController.getWishlist);
