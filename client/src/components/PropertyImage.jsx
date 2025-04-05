@@ -16,12 +16,15 @@ const PropertyImage = ({
   className = "",
   showGallery = false,
   id,
+  propertyId, // New prop to identify the property
+  onClick, // New prop to handle custom click events
   fallbackImage = "https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fHJlYWwlMjBlc3RhdGV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=600&q=60",
 }) => {
   const [imageError, setImageError] = useState(false);
   const [showImageGallery, setShowImageGallery] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [processedImages, setProcessedImages] = useState([]);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   // Process the images on component mount or when inputs change
   useEffect(() => {
@@ -59,7 +62,7 @@ const PropertyImage = ({
     }
 
     setProcessedImages(imgArray);
-  }, [image, images, fallbackImage, alt]);
+  }, [image, images, fallbackImage]);
 
   // Use the first image as the display image
   const displayImage = processedImages.length > 0 ? processedImages[0] : null;
@@ -96,15 +99,34 @@ const PropertyImage = ({
     setImageError(true);
   };
 
-  const openGallery = () => {
-    if (processedImages.length > 0) {
-      setShowImageGallery(true);
+  const handleImageClick = (e) => {
+    // If a custom onClick handler is provided, call it first
+    if (onClick) {
+      onClick(e, propertyId);
     }
+
+    // If showGallery is true, open the gallery
+    if (showGallery && !isGalleryOpen) {
+      openGallery();
+    }
+  };
+
+  const openGallery = () => {
+    // Always open the gallery when clicked, even with just one image
+    setShowImageGallery(true);
+    setIsGalleryOpen(true);
+
+    // Prevent scrolling when gallery is open
+    document.body.style.overflow = "hidden";
   };
 
   const closeGallery = () => {
     setShowImageGallery(false);
     setCurrentImageIndex(0);
+    setIsGalleryOpen(false);
+
+    // Restore scrolling when gallery is closed
+    document.body.style.overflow = "auto";
   };
 
   const nextImage = (e) => {
@@ -132,19 +154,23 @@ const PropertyImage = ({
       >
         <div className="relative w-full max-w-5xl p-4">
           {/* Navigation buttons */}
-          <button
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 text-black z-10"
-            onClick={prevImage}
-          >
-            <i className="fas fa-chevron-left text-xl"></i>
-          </button>
+          {processedImages.length > 1 && (
+            <>
+              <button
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 text-black z-10"
+                onClick={prevImage}
+              >
+                <i className="fas fa-chevron-left text-xl"></i>
+              </button>
 
-          <button
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 text-black z-10"
-            onClick={nextImage}
-          >
-            <i className="fas fa-chevron-right text-xl"></i>
-          </button>
+              <button
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 text-black z-10"
+                onClick={nextImage}
+              >
+                <i className="fas fa-chevron-right text-xl"></i>
+              </button>
+            </>
+          )}
 
           {/* Close button */}
           <button
@@ -154,10 +180,19 @@ const PropertyImage = ({
             <i className="fas fa-times text-xl"></i>
           </button>
 
-          {/* Image counter */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm">
-            {currentImageIndex + 1} / {processedImages.length}
-          </div>
+          {/* Property information if available */}
+          {propertyId && (
+            <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white px-4 py-2 rounded-lg text-sm">
+              Property ID: {propertyId}
+            </div>
+          )}
+
+          {/* Image counter - only show if multiple images */}
+          {processedImages.length > 1 && (
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm">
+              {currentImageIndex + 1} / {processedImages.length}
+            </div>
+          )}
 
           {/* Main image */}
           <img
@@ -177,13 +212,10 @@ const PropertyImage = ({
         id={id}
         src={getImageUrl(displayImage)}
         alt={alt}
-        className={`${className} ${
-          processedImages.length > 1 && showGallery ? "cursor-pointer" : ""
-        }`}
+        className={`${className} ${showGallery ? "cursor-pointer" : ""}`}
         onError={handleImageError}
-        onClick={
-          showGallery && processedImages.length > 1 ? openGallery : undefined
-        }
+        onClick={handleImageClick}
+        data-property-id={propertyId}
       />
       {/* Render image gallery modal when active */}
       <ImageGallery />
