@@ -1,13 +1,22 @@
+/**
+ * Listings.jsx
+ * Main property listings page component that displays a filterable grid of properties
+ * with category navigation, search functionality, and property cards.
+ */
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import PropertyImage from "../components/PropertyImage";
 
 const Listings = () => {
+  // State for property data and loading indicators
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
+
+  // State for various filter settings
   const [filters, setFilters] = useState({
     priceMin: "",
     priceMax: "",
@@ -31,15 +40,23 @@ const Listings = () => {
     dryer: false,
     gym: false,
   });
+
+  // UI state
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [sortBy, setSortBy] = useState("price-low-high");
   const [isApiData, setIsApiData] = useState(false);
+
+  // Routing hooks
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Add a ref for the categories container and functions to scroll it
+  // Reference for the categories container for horizontal scrolling
   const categoriesContainerRef = useRef(null);
 
+  /**
+   * Scrolls the categories container left or right
+   * @param {string} direction - Either "left" or "right"
+   */
   const scrollCategories = (direction) => {
     const container = categoriesContainerRef.current;
     if (!container) return;
@@ -56,6 +73,9 @@ const Listings = () => {
     });
   };
 
+  /**
+   * Reset all filters when component mounts
+   */
   useEffect(() => {
     console.log("FILTER RESET EFFECT: Resetting all filters on mount");
     // Reset all filters when the page loads to ensure all properties show
@@ -84,6 +104,10 @@ const Listings = () => {
     });
   }, []);
 
+  /**
+   * Main effect for fetching properties and handling URL parameters
+   * Runs when the URL search parameters change
+   */
   useEffect(() => {
     // Continue with the normal location param handling
     const queryParams = new URLSearchParams(location.search);
@@ -127,6 +151,9 @@ const Listings = () => {
     // Update filters with all changes
     setFilters(updatedFilters);
 
+    /**
+     * Fetches properties from the API or falls back to dummy data
+     */
     const fetchProperties = async () => {
       setLoading(true);
       setError(null);
@@ -149,6 +176,7 @@ const Listings = () => {
           )}`;
         }
 
+        // Make API call to fetch properties
         const response = await axios.get(
           `/api/properties${queryString ? `?${queryString}` : ""}`
         );
@@ -184,6 +212,10 @@ const Listings = () => {
     fetchProperties();
   }, [location.search]);
 
+  /**
+   * Handles changes to the filter inputs
+   * @param {Event} e - The change event
+   */
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters({
@@ -192,11 +224,8 @@ const Listings = () => {
     });
   };
 
-  // Filter, sort, and display properties
+  // Apply category filter
   const filteredProperties = properties.filter((property) => {
-    // Add debug information if needed
-    // console.log("Filtering property:", property.title, "Category:", property.category, "PropertyType:", property.propertyType);
-
     // If no category filter is active, show all properties
     if (activeCategory === "all") {
       return true;
@@ -228,7 +257,8 @@ const Listings = () => {
       });
     }
 
-    // For all other categories, use case-insensitive matching
+    // Match based on property category and type
+    // Case-insensitive matching for various property types
     switch (activeCat) {
       case "house":
         return (
@@ -431,7 +461,7 @@ const Listings = () => {
       return false;
     }
 
-    // Amenity filters
+    // Amenity filters - check each selected amenity
     if (
       amenityFilters.wifi &&
       !(property.amenities && property.amenities.wifi)
@@ -513,7 +543,10 @@ const Listings = () => {
     return matches;
   });
 
-  // Sort properties based on sortBy criteria
+  /**
+   * Sort properties based on the selected sort criteria
+   * Options include price (low-high/high-low), rating, newest, and bedrooms
+   */
   const sortedProperties = [...fullyFilteredProperties].sort((a, b) => {
     switch (sortBy) {
       case "price-low-high":
@@ -537,7 +570,9 @@ const Listings = () => {
     }
   });
 
-  // Log information about filtered properties
+  /**
+   * Debug logging for tracking filtered properties
+   */
   useEffect(() => {
     // Create a variable to track if API data is being used
     const usingApiData = isApiData !== undefined ? isApiData : false;
@@ -609,6 +644,10 @@ const Listings = () => {
     });
   });
 
+  /**
+   * Toggles a specific amenity filter
+   * @param {string} filter - The amenity filter to toggle
+   */
   const handleAmenityFilter = (filter) => {
     setAmenityFilters({
       ...amenityFilters,
@@ -616,7 +655,10 @@ const Listings = () => {
     });
   };
 
-  // Helper function to count active filters
+  /**
+   * Counts the number of active filters across all filter types
+   * @returns {number} - The total count of active filters
+   */
   const countActiveFilters = () => {
     let count = 0;
 
@@ -635,7 +677,9 @@ const Listings = () => {
     return count;
   };
 
-  // Function to clear all filters
+  /**
+   * Resets all filters to their default values
+   */
   const clearAllFilters = () => {
     setFilters({
       priceMin: "",
@@ -662,7 +706,11 @@ const Listings = () => {
     setActiveCategory("all");
   };
 
-  // Helper function to get normalized category names
+  /**
+   * Normalizes category names for consistent display and matching
+   * @param {string} categoryId - The category ID to normalize
+   * @returns {string} - The normalized category name
+   */
   const getNormalizedCategory = (categoryId) => {
     // Special cases mapping
     const categoryMap = {
@@ -695,7 +743,10 @@ const Listings = () => {
     return categoryMap[categoryId] || categoryId;
   };
 
-  // Categories for the horizontal scrolling menu
+  /**
+   * Categories for the horizontal scrolling menu
+   * Each category has an ID, display label, and an icon class
+   */
   const categories = [
     { id: "all", label: "All", icon: "fas fa-home" },
     { id: "Trending", label: "Trending", icon: "fas fa-fire" },
@@ -729,6 +780,10 @@ const Listings = () => {
     { id: "Vineyard", label: "Vineyard", icon: "fas fa-wine-glass-alt" },
   ];
 
+  /**
+   * Handles click on category filters
+   * @param {string} categoryId - The ID of the clicked category
+   */
   const handleCategoryClick = (categoryId) => {
     console.log("Category clicked:", categoryId);
 
@@ -750,13 +805,55 @@ const Listings = () => {
     });
   };
 
-  // Function to navigate to property detail page
+  /**
+   * Navigates to property detail page
+   * @param {string} propertyId - The ID of the property to view
+   * @param {Event} e - The click event (optional)
+   */
   const navigateToPropertyDetail = (propertyId, e) => {
     if (e) e.stopPropagation();
-    navigate(`/properties/${propertyId}`);
+
+    console.log("Navigating to property with ID:", propertyId);
+
+    // Ensure propertyId is a string and is valid
+    const stringId = String(propertyId).trim();
+
+    if (!stringId) {
+      console.error("Invalid property ID");
+      return;
+    }
+
+    // Find the full property object from the properties array
+    const currentProperty = properties.find((p) => String(p._id) === stringId);
+
+    if (currentProperty) {
+      try {
+        // Store entire property data in session storage
+        sessionStorage.setItem(
+          "currentProperty",
+          JSON.stringify(currentProperty)
+        );
+
+        // Also store the property ID separately for redundancy
+        sessionStorage.setItem("lastViewedPropertyId", stringId);
+
+        console.log("Stored complete property data:", currentProperty);
+      } catch (err) {
+        console.error("Failed to store property in session storage:", err);
+      }
+    } else {
+      console.error("Property not found in current properties list");
+    }
+
+    // Navigate to property detail page
+    navigate(`/properties/${stringId}`);
   };
 
-  // Convert category ID to property type
+  /**
+   * Converts category ID to property type for API queries
+   * @param {string} categoryId - The category ID to convert
+   * @returns {string} - The corresponding property type
+   */
   const mapCategoryToPropertyType = (categoryId) => {
     // If no category, return empty string
     if (!categoryId) return "";
@@ -912,11 +1009,12 @@ const Listings = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Filter Modal */}
+        {/* Filter Modal - shows when filter button is clicked */}
         {showFilterModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
               <div className="p-6">
+                {/* Filter modal header */}
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-semibold text-neutral-800">
                     All Filters
@@ -930,7 +1028,7 @@ const Listings = () => {
                 </div>
 
                 <div className="space-y-6">
-                  {/* Price Range */}
+                  {/* Price Range filter */}
                   <div>
                     <h3 className="text-lg font-medium text-neutral-800 mb-3">
                       Price Range1111
@@ -975,7 +1073,7 @@ const Listings = () => {
                     </div>
                   </div>
 
-                  {/* Bedrooms */}
+                  {/* Bedrooms filter */}
                   <div>
                     <h3 className="text-lg font-medium text-neutral-800 mb-3">
                       Bedrooms
@@ -995,7 +1093,7 @@ const Listings = () => {
                     </select>
                   </div>
 
-                  {/* Location */}
+                  {/* Location filter */}
                   <div>
                     <h3 className="text-lg font-medium text-neutral-800 mb-3">
                       Location
@@ -1010,12 +1108,13 @@ const Listings = () => {
                     />
                   </div>
 
-                  {/* Amenities */}
+                  {/* Amenities filter checkboxes */}
                   <div>
                     <h3 className="text-lg font-medium text-neutral-800 mb-3">
                       Amenities
                     </h3>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                      {/* Checkboxes for various amenities */}
                       <div className="flex items-center">
                         <input
                           type="checkbox"
@@ -1247,7 +1346,7 @@ const Listings = () => {
           </div>
         )}
 
-        {/* Results */}
+        {/* Property Results Section */}
         <h1 className="text-2xl font-bold text-neutral-800 mb-4">
           {sortedProperties.length}{" "}
           {sortedProperties.length === 1 ? "Property" : "Properties"} Available
@@ -1265,6 +1364,7 @@ const Listings = () => {
           )}
         </h1>
 
+        {/* No results message */}
         {sortedProperties.length === 0 ? (
           <div className="bg-white rounded-xl py-12 text-center shadow-sm">
             <div className="text-5xl text-neutral-300 mb-4">
@@ -1285,9 +1385,10 @@ const Listings = () => {
             </button>
           </div>
         ) : (
+          /* Property grid - displays all filtered and sorted properties */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {sortedProperties.map((property) => {
-              // Make sure we handle missing image properly by adding safety checks
+              // Handle missing image properly by adding safety checks
               const hasValidImage =
                 property.image &&
                 typeof property.image === "string" &&
@@ -1302,7 +1403,10 @@ const Listings = () => {
                     (typeof img === "object" && img.url)
                 );
 
-              // Generic function to provide fallback images by category
+              /**
+               * Provides a fallback image based on property category
+               * @returns {string} - URL of an appropriate fallback image
+               */
               const getCategoryImage = () => {
                 // For MongoDB data, ensure we normalize the property type/category
                 const propertyType =
@@ -1370,12 +1474,14 @@ const Listings = () => {
                 : [getCategoryImage()];
 
               return (
+                // Property card component
                 <div
                   key={property._id}
                   className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
                   onClick={() => navigateToPropertyDetail(property._id)}
                 >
                   <div>
+                    {/* Property image section with price tag */}
                     <div className="relative h-60 overflow-hidden">
                       <span className="absolute top-3 right-3 bg-white text-primary-600 font-semibold px-3 py-1 rounded-full text-sm shadow-sm z-10">
                         ${property.price || 0}/night
@@ -1383,7 +1489,7 @@ const Listings = () => {
 
                       {/* Image carousel */}
                       <div className="relative w-full h-full">
-                        {/* Main image */}
+                        {/* Main property image */}
                         <PropertyImage
                           images={propertyImages}
                           alt={property.title || "Property"}
@@ -1391,6 +1497,11 @@ const Listings = () => {
                           showGallery={true}
                           id={`property-image-${property._id}`}
                           fallbackImage={getCategoryImage()}
+                          propertyId={property._id}
+                          onClick={(e, propId) => {
+                            e.stopPropagation();
+                            navigateToPropertyDetail(propId, e);
+                          }}
                         />
 
                         {/* Image counter badge */}
@@ -1402,6 +1513,7 @@ const Listings = () => {
                         )}
                       </div>
 
+                      {/* Favorite button */}
                       <button
                         className="absolute top-3 left-3 bg-white text-neutral-600 hover:text-primary-600 h-8 w-8 rounded-full flex items-center justify-center shadow-sm transition-colors duration-200"
                         onClick={(e) => {
@@ -1412,6 +1524,8 @@ const Listings = () => {
                         <i className="far fa-heart"></i>
                       </button>
                     </div>
+
+                    {/* Property details section */}
                     <div className="p-5">
                       {/* Property type tag */}
                       <div className="mb-2">
@@ -1422,7 +1536,7 @@ const Listings = () => {
                         </span>
                       </div>
 
-                      {/* Rest of property details */}
+                      {/* Property title and rating */}
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="text-lg font-semibold text-neutral-800 group-hover:text-primary-600 transition-colors duration-200">
                           {property.title || "Unnamed Property"}
@@ -1434,9 +1548,13 @@ const Listings = () => {
                           </span>
                         </div>
                       </div>
+
+                      {/* Property description */}
                       <p className="text-neutral-600 mb-3 line-clamp-2 text-sm">
                         {property.description || "No description available"}
                       </p>
+
+                      {/* Property specs (beds, baths, size) */}
                       <div className="flex items-center text-neutral-500 text-sm mb-4">
                         <span className="flex items-center mr-3">
                           <i className="fas fa-bed mr-1"></i>{" "}
@@ -1457,6 +1575,8 @@ const Listings = () => {
                           {property.size || "100"}m²
                         </span>
                       </div>
+
+                      {/* Property location and view details button */}
                       <div className="flex justify-between items-center">
                         <div className="flex items-center text-sm">
                           <i className="fas fa-map-marker-alt text-primary-500 mr-1 text-xs"></i>
@@ -1490,8 +1610,10 @@ const Listings = () => {
   );
 };
 
-// Dummy data for demonstration if API fails
-
+/**
+ * Dummy property data for fallback when API is unavailable
+ * This data is used when the API call fails or returns invalid data
+ */
 const dummyProperties = [
   // Apartment category (2 properties)
   {
@@ -2767,7 +2889,6 @@ const dummyProperties = [
       "https://images.unsplash.com/photo-1569430044961-e5c7504b43f9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2F2ZSUyMGhvdXNlfGVufDB8fDB8fHww&auto=format&fit=crop&w=600&q=60",
     ],
   },
-
 
   // update
   {
