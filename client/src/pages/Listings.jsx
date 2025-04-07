@@ -2086,7 +2086,7 @@ const dummyProperties = [
     },
     features: ["Amazing views", "City View"],
     images: [
-      "https://images.unsplash.com/photo-1533323905636-7f0bfa0ba5ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8Y2l0eSUyMHZpZXd8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=600&q=60",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ],
   },
 
@@ -2115,7 +2115,7 @@ const dummyProperties = [
     },
     features: ["Tiny homes", "Minimalist"],
     images: [
-      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dGlueSUyMGhvdXNlfGVufDB8fDB8fHww&auto=format&fit=crop&w=600&q=60",
+      "https://images.unsplash.com/photo-1668015642451-a3bb11afb441?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ],
   },
   {
@@ -2417,7 +2417,7 @@ const dummyProperties = [
     },
     features: ["Tropical", "Garden"],
     images: [
-      "https://images.unsplash.com/photo-1570211776045-af3a51026f4a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8dHJvcGljYWwlMjBob3VzZXxlbnwwfHwwfHx8MA%3D&auto=format&fit=crop&w=600&q=60",
+      "https://plus.unsplash.com/premium_photo-1687960116574-782d09070294?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8VHJvcGljYWwlMjBIb3VzZXxlbnwwfHwwfHx8MA%3D%3D",
     ],
   },
   {
@@ -2886,7 +2886,7 @@ const dummyProperties = [
     },
     features: ["Cave", "Unique"],
     images: [
-      "https://images.unsplash.com/photo-1569430044961-e5c7504b43f9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2F2ZSUyMGhvdXNlfGVufDB8fDB8fHww&auto=format&fit=crop&w=600&q=60",
+      "https://images.unsplash.com/photo-1717161282488-528e26aa307b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDd8fE1vZGVybiUyMERlc2VydCUyMENhdmUlMjBIb3VzZXxlbnwwfHwwfHx8MA%3D%3D",
     ],
   },
 
