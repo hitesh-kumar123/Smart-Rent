@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 /**
  * PropertyImage Component
@@ -23,11 +23,10 @@ const PropertyImage = ({
   const [imageError, setImageError] = useState(false);
   const [showImageGallery, setShowImageGallery] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [processedImages, setProcessedImages] = useState([]);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
-  // Process the images on component mount or when inputs change
-  useEffect(() => {
+  // Memoize the processed images to prevent unnecessary recalculations
+  const processedImages = useMemo(() => {
     let imgArray = [];
 
     // Add any single image first (if valid)
@@ -61,7 +60,7 @@ const PropertyImage = ({
       imgArray = [fallbackImage];
     }
 
-    setProcessedImages(imgArray);
+    return imgArray;
   }, [image, images, fallbackImage]);
 
   // Use the first image as the display image
