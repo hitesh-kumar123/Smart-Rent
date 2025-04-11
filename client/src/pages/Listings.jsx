@@ -8,6 +8,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import PropertyImage from "../components/PropertyImage";
+import { useAppSettings } from "../contexts/AppSettingsContext";
 
 const Listings = () => {
   // State for property data and loading indicators
@@ -16,6 +17,17 @@ const Listings = () => {
   const [error, setError] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
 
+  // App settings for language and currency
+  const {
+    language,
+    languageName,
+    currency,
+    changeLanguage,
+    supportedLanguages,
+    formatPrice,
+    isTranslating,
+  } = useAppSettings();
+
   // State for various filter settings
   const [filters, setFilters] = useState({
     priceMin: "",
@@ -23,6 +35,7 @@ const Listings = () => {
     propertyType: "",
     bedrooms: "",
     location: "",
+    language: language, // Add language to filters
   });
   const [activeCategory, setActiveCategory] = useState("all");
   const [amenityFilters, setAmenityFilters] = useState({
@@ -85,6 +98,7 @@ const Listings = () => {
       propertyType: "",
       bedrooms: "",
       location: "",
+      language: language, // Add language to filters
     });
     setActiveCategory("all");
     setAmenityFilters({
@@ -102,7 +116,7 @@ const Listings = () => {
       dryer: false,
       gym: false,
     });
-  }, []);
+  }, [language]);
 
   /**
    * Main effect for fetching properties and handling URL parameters
@@ -210,7 +224,7 @@ const Listings = () => {
     };
 
     fetchProperties();
-  }, [location.search]);
+  }, [location.search, language]);
 
   /**
    * Handles changes to the filter inputs
@@ -687,6 +701,7 @@ const Listings = () => {
       propertyType: "",
       bedrooms: "",
       location: "",
+      language: language, // Add language to filters
     });
     setAmenityFilters({
       topRated: false,
@@ -1108,6 +1123,45 @@ const Listings = () => {
                     />
                   </div>
 
+                  {/* Language filter */}
+                  <div>
+                    <h3 className="text-lg font-medium text-neutral-800 mb-3">
+                      Language
+                    </h3>
+                    <div className="grid grid-cols-3 gap-2">
+                      {supportedLanguages.slice(0, 6).map((lang) => (
+                        <button
+                          key={lang.code}
+                          type="button"
+                          onClick={() => {
+                            changeLanguage(lang.code, lang.name);
+                            setFilters({
+                              ...filters,
+                              language: lang.code,
+                            });
+                          }}
+                          className={`flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
+                            language === lang.code
+                              ? "bg-primary-50 text-primary-600 font-medium border border-primary-200"
+                              : "text-neutral-700 hover:bg-neutral-50 border border-neutral-200 hover:border-neutral-300"
+                          }`}
+                        >
+                          <span>{lang.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-2">
+                      {isTranslating ? (
+                        <span className="flex items-center">
+                          <i className="fas fa-spinner fa-spin mr-1"></i>
+                          Translating content...
+                        </span>
+                      ) : (
+                        `Showing content in ${languageName}`
+                      )}
+                    </p>
+                  </div>
+
                   {/* Amenities filter checkboxes */}
                   <div>
                     <h3 className="text-lg font-medium text-neutral-800 mb-3">
@@ -1311,6 +1365,7 @@ const Listings = () => {
                           propertyType: "",
                           bedrooms: "",
                           location: "",
+                          language: language, // Add language to filters
                         });
                         setAmenityFilters({
                           topRated: false,
@@ -1470,8 +1525,8 @@ const Listings = () => {
               const propertyImages = hasValidImages
                 ? property.images
                 : hasValidImage
-                ? [property.image]
-                : [getCategoryImage()];
+                  ? [property.image]
+                  : [getCategoryImage()];
 
               return (
                 // Property card component
@@ -1484,7 +1539,7 @@ const Listings = () => {
                     {/* Property image section with price tag */}
                     <div className="relative h-60 overflow-hidden">
                       <span className="absolute top-3 right-3 bg-white text-primary-600 font-semibold px-3 py-1 rounded-full text-sm shadow-sm z-10">
-                        ${property.price || 0}/night
+                        {formatPrice(property.price || 0)}/night
                       </span>
 
                       {/* Image carousel */}
