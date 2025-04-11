@@ -39,6 +39,7 @@ const Navbar = () => {
     supportedLanguages,
     getText,
     isTranslating,
+    isLoadingRates,
   } = useAppSettings();
 
   // Popular suggestions
@@ -432,59 +433,74 @@ const Navbar = () => {
                         Select a currency
                       </h3>
 
-                      {/* Popular currencies */}
-                      <div className="mb-6">
-                        <div className="font-medium text-neutral-700 mb-2">
-                          Popular currencies
+                      {isLoadingRates ? (
+                        <div className="flex justify-center py-8">
+                          <i className="fas fa-spinner fa-spin text-primary-500 mr-2 text-xl"></i>
+                          <span className="text-neutral-700">
+                            Loading exchange rates...
+                          </span>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {currencies.slice(0, 4).map((curr) => (
-                            <button
-                              key={curr.code}
-                              onClick={() => handleCurrencyChange(curr.code)}
-                              className={`flex items-center px-4 py-3 text-sm rounded-lg transition-all duration-200 ${
-                                currency === curr.code
-                                  ? "bg-primary-50 text-primary-600 font-medium border-2 border-primary-200"
-                                  : "text-neutral-700 hover:bg-neutral-50 border border-neutral-200 hover:border-neutral-300"
-                              }`}
-                            >
-                              <span className="mr-2 font-bold">
-                                {curr.symbol}
-                              </span>
-                              <span>
-                                {curr.code} - {curr.name}
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      ) : (
+                        <>
+                          {/* Popular currencies */}
+                          <div className="mb-6">
+                            <div className="font-medium text-neutral-700 mb-2">
+                              Popular currencies
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {currencies.slice(0, 4).map((curr) => (
+                                <button
+                                  key={curr.code}
+                                  onClick={() =>
+                                    handleCurrencyChange(curr.code)
+                                  }
+                                  className={`flex items-center px-4 py-3 text-sm rounded-lg transition-all duration-200 ${
+                                    currency === curr.code
+                                      ? "bg-primary-50 text-primary-600 font-medium border-2 border-primary-200"
+                                      : "text-neutral-700 hover:bg-neutral-50 border border-neutral-200 hover:border-neutral-300"
+                                  }`}
+                                >
+                                  <span className="mr-2 font-bold">
+                                    {curr.symbol}
+                                  </span>
+                                  <span>
+                                    {curr.code} - {curr.name}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
 
-                      {/* All currencies */}
-                      <div>
-                        <div className="font-medium text-neutral-700 mb-2">
-                          All currencies
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {currencies.map((curr) => (
-                            <button
-                              key={curr.code}
-                              onClick={() => handleCurrencyChange(curr.code)}
-                              className={`flex items-center px-4 py-3 text-sm rounded-lg transition-all duration-200 ${
-                                currency === curr.code
-                                  ? "bg-primary-50 text-primary-600 font-medium border-2 border-primary-200"
-                                  : "text-neutral-700 hover:bg-neutral-50 border border-neutral-200 hover:border-neutral-300"
-                              }`}
-                            >
-                              <span className="mr-2 font-bold">
-                                {curr.symbol}
-                              </span>
-                              <span>
-                                {curr.code} - {curr.name}
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                          {/* All currencies */}
+                          <div>
+                            <div className="font-medium text-neutral-700 mb-2">
+                              All currencies
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {currencies.map((curr) => (
+                                <button
+                                  key={curr.code}
+                                  onClick={() =>
+                                    handleCurrencyChange(curr.code)
+                                  }
+                                  className={`flex items-center px-4 py-3 text-sm rounded-lg transition-all duration-200 ${
+                                    currency === curr.code
+                                      ? "bg-primary-50 text-primary-600 font-medium border-2 border-primary-200"
+                                      : "text-neutral-700 hover:bg-neutral-50 border border-neutral-200 hover:border-neutral-300"
+                                  }`}
+                                >
+                                  <span className="mr-2 font-bold">
+                                    {curr.symbol}
+                                  </span>
+                                  <span>
+                                    {curr.code} - {curr.name}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
