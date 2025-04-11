@@ -1,2 +1,2 @@
 // Entry point for the application
-require('./app'); 
+require("./app");
