@@ -27,6 +27,9 @@ import FAQ from "./pages/FAQ";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Cookies from "./pages/Cookies";
+import ResetPassword from "./pages/ResetPassword";
+import Map from "./pages/Map";
+import PropertyMap from "./pages/PropertyMap";
 // Component to protect routes that require authentication
 import ProtectedRoute from "./components/ProtectedRoute";
 // Import ScrollToTop component
@@ -35,6 +38,8 @@ import ScrollToTop from "./components/ScrollToTop";
 import { AppSettingsProvider } from "./contexts/AppSettingsContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import "./App.css";
+import PaymentPage from "./pages/PaymentPage";
+// import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   // Set browser's scrollRestoration to manual to take control of scrolling
@@ -101,6 +106,14 @@ function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/cookies" element={<Cookies />} />
+              <Route path="/payment" element={<PaymentPage />} />
+              <Route
+                path="/reset-password/:token"
+                element={<ResetPassword />}
+              />
+              <Route path="/map" element={<Map />} />
+              <Route path="/property/:id/map" element={<PropertyMap />} />
+              {/* <Route path="/forgot-password" element={<ForgotPassword />} /> */}
 
               {/* Protected routes - require user authentication */}
               <Route
@@ -120,7 +133,6 @@ function App() {
                 }
               />
 
-              
               <Route
                 path="/trips/:id/manage"
                 element={
