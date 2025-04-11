@@ -7,7 +7,8 @@ const { upload } = require("../cloudConfig");
 // Public routes
 router.post("/register", userController.registerUser);
 router.post("/login", userController.loginUser);
-router.post("/reset-password", userController.resetPassword);
+router.post("/forgot-password", userController.forgotPassword);
+router.post("/reset-password/:token", userController.resetPassword);
 
 // Protected routes
 router.post("/logout", authenticate, userController.logoutUser);
