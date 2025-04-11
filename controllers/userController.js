@@ -5,9 +5,11 @@ const {
   updateUserSchema,
   passwordSchema,
   passwordResetRequestSchema,
+  resetPasswordSchema,
 } = require("../schema");
 const { cloudinary } = require("../cloudConfig");
 const crypto = require("crypto");
+const { sendPasswordResetEmail } = require("../services/emailService");
 
 // @desc    Register user
 // @route   POST /api/users/register
@@ -395,52 +397,103 @@ const removeFromWishlist = async (req, res) => {
 };
 
 // @desc    Request password reset
-// @route   POST /api/users/reset-password
+// @route   POST /api/users/forgot-password
 // @access  Public
-const resetPassword = async (req, res) => {
+const forgotPassword = async (req, res) => {
   try {
+    console.log("Forgot password request received:", req.body);
+
     // Validate request data
     const { error, value } = passwordResetRequestSchema.validate(req.body);
     if (error) {
+      console.error("Validation error:", error.details[0].message);
       return res.status(400).json({ message: error.details[0].message });
     }
 
     const { email } = value;
+    console.log(`Looking for user with email: ${email}`);
 
-    // Find user by email
+    // Find user
     const user = await User.findOne({ email });
-
-    // Don't reveal if user exists or not (security)
     if (!user) {
+      console.log(`User not found with email: ${email}`);
+      // Don't reveal if user exists for security
       return res.status(200).json({
         message:
-          "If your email is registered, you will receive a password reset link",
+          "If a user with this email exists, they will receive a password reset email",
       });
     }
 
-    // Generate reset token valid for 1 hour
-    const resetToken = crypto.randomBytes(20).toString("hex");
-    user.resetPasswordToken = crypto
-      .createHash("sha256")
-      .update(resetToken)
-      .digest("hex");
-    user.resetPasswordExpire = Date.now() + 3600000; // 1 hour
+    console.log(`User found: ${user._id}`);
 
+    try {
+      // Generate reset token using the model method
+      const resetToken = user.createPasswordResetToken();
+      await user.save({ validateBeforeSave: false });
+
+      // Send email
+      console.log("Attempting to send reset email");
+      await sendPasswordResetEmail(email, resetToken);
+      console.log("Reset email sent successfully");
+
+      res.status(200).json({
+        message:
+          "If a user with this email exists, they will receive a password reset email",
+      });
+    } catch (emailError) {
+      // If email sending fails, clean up the token
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      console.error("Error sending reset email:", emailError);
+      throw new Error("Failed to send password reset email");
+    }
+  } catch (error) {
+    console.error("Error in forgotPassword controller:", error);
+    res.status(500).json({
+      message: "Error processing password reset request",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+// @desc    Reset password
+// @route   POST /api/users/reset-password/:token
+// @access  Public
+const resetPassword = async (req, res) => {
+  try {
+    // Validate request data
+    const { error, value } = resetPasswordSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const { token } = req.params;
+    const { password } = value;
+
+    // Find user with valid reset token
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired reset token" });
+    }
+
+    // Update password
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
     await user.save();
 
-    // In a production app, you would send an email with a reset link
-    // For now, we'll just return success
-
-    res.status(200).json({
-      message:
-        "If your email is registered, you will receive a password reset link",
-      // In development, return token for testing
-      resetToken:
-        process.env.NODE_ENV === "development" ? resetToken : undefined,
-    });
+    res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: "Error resetting password" });
   }
 };
 
@@ -456,5 +509,6 @@ module.exports = {
   getWishlist,
   addToWishlist,
   removeFromWishlist,
+  forgotPassword,
   resetPassword,
 };
