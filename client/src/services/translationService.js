@@ -108,8 +108,38 @@ export const getSupportedLanguages = () => {
   ];
 };
 
+/**
+ * Fetches current exchange rates from a free API
+ * @returns {Promise<Object>} Object containing exchange rates
+ */
+export const getExchangeRates = async () => {
+  try {
+    const response = await fetch(
+      "https://api.exchangerate-api.com/v4/latest/USD"
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch exchange rates");
+    }
+    const data = await response.json();
+    return data.rates;
+  } catch (error) {
+    console.error("Error fetching exchange rates:", error);
+    // Return default rates as fallback
+    return {
+      USD: 1,
+      EUR: 0.85,
+      GBP: 0.75,
+      JPY: 110,
+      CAD: 1.25,
+      AUD: 1.35,
+      INR: 75,
+    };
+  }
+};
+
 export default {
   translateText,
   batchTranslate,
   getSupportedLanguages,
+  getExchangeRates,
 };
