@@ -4,10 +4,11 @@
  * Features trip details, host information, and trip management options
  * Includes review functionality for completed trips
  */
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 const Trips = () => {
+  const location = useLocation();
   // State management for tabs and review modal
   const [activeTab, setActiveTab] = useState("upcoming"); // Track active tab selection
   const [showReviewModal, setShowReviewModal] = useState(false); // Control review modal visibility
@@ -17,9 +18,10 @@ const Trips = () => {
     comment: "", // User's review text
   });
 
-  // Mock trip data - would come from API in production
-  const trips = {
+  // Initialize trips state with empty arrays
+  const [trips, setTrips] = useState({
     upcoming: [
+
       {
         id: 1,
         property: {
@@ -62,8 +64,8 @@ const Trips = () => {
         totalPrice: "$950",
         status: "pending", // Trip is pending host approval
       },
-    ],
-    current: [], // No active trips in this example
+    ], // No active trips in this example
+    current: [],
     past: [
       {
         id: 3,
@@ -87,7 +89,94 @@ const Trips = () => {
         status: "completed", // Trip is completed, eligible for review
       },
     ],
-  };
+  });
+
+  // Effect to handle successful payment and add new trip
+  useEffect(() => {
+    if (location.state?.paymentSuccess && location.state?.propertyId) {
+      // Get property from session storage
+      const propertyData = JSON.parse(
+        sessionStorage.getItem("currentProperty")
+      );
+
+      if (propertyData) {
+        // Check if property already exists in upcoming trips
+        const propertyExists = trips.upcoming.some(
+          (trip) => trip.property.name === propertyData.title
+        );
+
+        // Only add if property doesn't exist
+        if (!propertyExists) {
+          // Create new trip object
+          const newTrip = {
+            id: Date.now(), // Generate unique ID
+            property: {
+              name: propertyData.title,
+              image:
+                propertyData.images?.[0] || "https://via.placeholder.com/400",
+              location: `${propertyData.location?.city || ""}, ${
+                propertyData.location?.country || ""
+              }`,
+              rating: propertyData.averageRating || 5.0,
+            },
+            host: {
+              name: propertyData.host?.name || "Host",
+              image:
+                propertyData.host?.image ||
+                "https://randomuser.me/api/portraits/men/1.jpg",
+            },
+            dates: {
+              checkin: new Date(
+                Date.now() + 7 * 24 * 60 * 60 * 1000
+              ).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              }),
+              checkout: new Date(
+                Date.now() + 12 * 24 * 60 * 60 * 1000
+              ).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              }),
+            },
+            guests: 2,
+            totalPrice: `$${(
+              propertyData.price * 5 +
+              60 +
+              75
+            ).toLocaleString()}`,
+            status: "confirmed",
+          };
+
+          // Add new trip to upcoming trips using functional update
+          setTrips((prevTrips) => {
+            // Check again if property exists in the current state
+            const exists = prevTrips.upcoming.some(
+              (trip) => trip.property.name === propertyData.title
+            );
+
+            if (exists) {
+              console.log("Property already exists in upcoming trips");
+              return prevTrips;
+            }
+
+            return {
+              ...prevTrips,
+              upcoming: [newTrip, ...prevTrips.upcoming],
+            };
+          });
+
+          // Set active tab to upcoming
+          setActiveTab("upcoming");
+        } else {
+          // Property already exists in upcoming trips
+          console.log("Property already booked in upcoming trips");
+        }
+      }
+    }
+  }, [location.state?.paymentSuccess, location.state?.propertyId]); // Only run when payment success or property ID changes
 
   /**
    * Opens the review modal for a specific trip
