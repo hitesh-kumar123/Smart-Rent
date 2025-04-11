@@ -10,6 +10,7 @@
     "@testing-library/user-event": "^13.5.0",
     "autoprefixer": "^10.4.21",
     "axios": "^1.8.4",
+    "leaflet": "^1.9.4",
     "node-fetch": "^3.3.2",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
