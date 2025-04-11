@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import PropertyImage from "../components/PropertyImage";
 import { dummyProperties } from "../data/dummyProperties";
 
 const PropertyDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -14,6 +15,7 @@ const PropertyDetail = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showReserveModal, setShowReserveModal] = useState(false);
+  const [showContinueButton, setShowContinueButton] = useState(false);
   const [review, setReview] = useState({
     rating: 5,
     comment: "",
@@ -710,8 +712,10 @@ const PropertyDetail = () => {
                           }`
                         : "Location details not available"}
                     </p>
-                    <div className="bg-neutral-100 h-64 rounded-lg flex items-center justify-center">
-                      <p className="text-neutral-500">Map view not available</p>
+                    <div className="bg-neutral-100 h-64 rounded-lg flex flex-col items-center justify-center w-full">
+                      <p className="text-neutral-500 mb-4">
+                        Map view not available
+                      </p>
                     </div>
                   </div>
                 )}
@@ -814,11 +818,39 @@ const PropertyDetail = () => {
               </div>
 
               <button
-                onClick={() => setShowReserveModal(true)}
+                onClick={() => {
+                  // Check if user is logged in
+                  const isLoggedIn = localStorage.getItem("token"); // or however you check login status
+                  if (!isLoggedIn) {
+                    // Redirect to login page
+                    window.location.href = "/login";
+                    return;
+                  }
+                  // If logged in, show continue button
+                  setShowContinueButton(true);
+                  setShowReserveModal(true);
+                }}
                 className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors mb-4"
               >
                 Reserve
               </button>
+
+              {showContinueButton && (
+                <button
+                  onClick={() => {
+                    // Navigate to payment page with property details
+                    navigate("/payment", {
+                      state: {
+                        propertyId: property._id,
+                        property: property,
+                      },
+                    });
+                  }}
+                  className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors mb-4"
+                >
+                  Continue to Payment
+                </button>
+              )}
 
               <p className="text-center text-neutral-600 text-sm mb-6">
                 You won't be charged yet
@@ -968,7 +1000,7 @@ const PropertyDetail = () => {
         )}
 
         {/* Reserve Modal */}
-        {showReserveModal && (
+        {/* {showReserveModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl p-6 max-w-md w-full">
               <h3 className="text-xl font-semibold mb-4">Reserve Property</h3>
@@ -1045,7 +1077,7 @@ const PropertyDetail = () => {
               </form>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
