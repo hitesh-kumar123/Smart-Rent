@@ -14,14 +14,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB Connection
+// MongoDB Connection with better error handling
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("MongoDB Connected Successfully");
   })
   .catch((err) => {
     console.error("MongoDB Connection Error:", err);
+    process.exit(1); // Exit if database connection fails
   });
 
 // Routes
@@ -31,6 +35,15 @@ app.use("/api", require("./routes/indexRoutes"));
 app.use("/api/messages", require("./routes/messageRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
 app.use("/api/bookings", require("./routes/bookingRoutes"));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: "Something went wrong!",
+    error: process.env.NODE_ENV === "development" ? err.message : undefined,
+  });
+});
 
 const PORT = process.env.PORT || 8000;
 
