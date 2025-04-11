@@ -1,25 +1,26 @@
-import React, { useState, useEffect, startTransition, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import StaticMap from '../components/StaticMap';
-import { uploadMultipleToCloudinary } from '../utils/cloudinaryService';
+import React, { useState, useEffect, startTransition, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import StaticMap from "../components/StaticMap";
+import { uploadMultipleToCloudinary } from "../utils/cloudinaryService";
+import { useAppSettings } from "../contexts/AppSettingsContext";
 
 const BecomeHost = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    propertyType: '',
-    propertyCategory: '',
+    propertyType: "",
+    propertyCategory: "",
     location: {
-      address: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      country: 'United States',
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "United States",
     },
     amenities: [],
     photos: [],
-    title: '',
-    description: '',
-    price: '',
+    title: "",
+    description: "",
+    price: "",
     guests: 1,
     bedrooms: 1,
     beds: 1,
@@ -31,46 +32,78 @@ const BecomeHost = () => {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
+  // Get currency and formatting functions from AppSettingsContext
+  const {
+    formatPrice,
+    currency,
+    isLoadingRates,
+    changeLanguage,
+    changeCurrency,
+    supportedLanguages,
+    language,
+  } = useAppSettings();
+
+  // Available currencies
+  const currencies = [
+    { code: "USD", symbol: "$", name: "US Dollar" },
+    { code: "EUR", symbol: "€", name: "Euro" },
+    { code: "GBP", symbol: "£", name: "British Pound" },
+    { code: "JPY", symbol: "¥", name: "Japanese Yen" },
+    { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
+    { code: "AUD", symbol: "A$", name: "Australian Dollar" },
+    { code: "INR", symbol: "₹", name: "Indian Rupee" },
+  ];
+
+  // Handler for changing language
+  const handleLanguageChange = (langCode, langName) => {
+    changeLanguage(langCode, langName);
+  };
+
+  // Handler for changing currency
+  const handleCurrencyChange = (currencyCode) => {
+    changeCurrency(currencyCode);
+  };
+
   const totalSteps = 5;
 
   const propertyTypes = [
-    { id: 'house', label: 'House', icon: '🏠' },
-    { id: 'apartment', label: 'Apartment', icon: '🏢' },
-    { id: 'guesthouse', label: 'Guesthouse', icon: '🏡' },
-    { id: 'hotel', label: 'Hotel', icon: '🏨' },
-    { id: 'cabin', label: 'Cabin', icon: '🌲' },
-    { id: 'villa', label: 'Villa', icon: '🏛️' },
+    { id: "house", label: "House", icon: "🏠" },
+    { id: "apartment", label: "Apartment", icon: "🏢" },
+    { id: "guesthouse", label: "Guesthouse", icon: "🏡" },
+    { id: "hotel", label: "Hotel", icon: "🏨" },
+    { id: "cabin", label: "Cabin", icon: "🌲" },
+    { id: "villa", label: "Villa", icon: "🏛️" },
   ];
 
   const propertyCategories = [
-    { id: 'beach', label: 'Beach', icon: '🏖️' },
-    { id: 'mountain', label: 'Mountain', icon: '⛰️' },
-    { id: 'city', label: 'City', icon: '🏙️' },
-    { id: 'countryside', label: 'Countryside', icon: '🌄' },
-    { id: 'lake', label: 'Lake', icon: '🌊' },
-    { id: 'desert', label: 'Desert', icon: '🏜️' },
+    { id: "beach", label: "Beach", icon: "🏖️" },
+    { id: "mountain", label: "Mountain", icon: "⛰️" },
+    { id: "city", label: "City", icon: "🏙️" },
+    { id: "countryside", label: "Countryside", icon: "🌄" },
+    { id: "lake", label: "Lake", icon: "🌊" },
+    { id: "desert", label: "Desert", icon: "🏜️" },
   ];
 
   const amenities = [
-    { id: 'wifi', label: 'Wifi', icon: '📶' },
-    { id: 'kitchen', label: 'Kitchen', icon: '🍳' },
-    { id: 'washer', label: 'Washer', icon: '🧺' },
-    { id: 'dryer', label: 'Dryer', icon: '👕' },
-    { id: 'ac', label: 'Air conditioning', icon: '❄️' },
-    { id: 'heating', label: 'Heating', icon: '🔥' },
-    { id: 'tv', label: 'TV', icon: '📺' },
-    { id: 'parking', label: 'Free parking', icon: '🚗' },
-    { id: 'pool', label: 'Pool', icon: '🏊' },
-    { id: 'hottub', label: 'Hot tub', icon: '♨️' },
-    { id: 'gym', label: 'Gym', icon: '💪' },
-    { id: 'pets', label: 'Pets allowed', icon: '🐕' },
+    { id: "wifi", label: "Wifi", icon: "📶" },
+    { id: "kitchen", label: "Kitchen", icon: "🍳" },
+    { id: "washer", label: "Washer", icon: "🧺" },
+    { id: "dryer", label: "Dryer", icon: "👕" },
+    { id: "ac", label: "Air conditioning", icon: "❄️" },
+    { id: "heating", label: "Heating", icon: "🔥" },
+    { id: "tv", label: "TV", icon: "📺" },
+    { id: "parking", label: "Free parking", icon: "🚗" },
+    { id: "pool", label: "Pool", icon: "🏊" },
+    { id: "hottub", label: "Hot tub", icon: "♨️" },
+    { id: "gym", label: "Gym", icon: "💪" },
+    { id: "pets", label: "Pets allowed", icon: "🐕" },
   ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
+
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
       setFormData({
         ...formData,
         [parent]: {
@@ -97,7 +130,7 @@ const BecomeHost = () => {
     if (formData.amenities.includes(amenityId)) {
       setFormData({
         ...formData,
-        amenities: formData.amenities.filter(id => id !== amenityId),
+        amenities: formData.amenities.filter((id) => id !== amenityId),
       });
     } else {
       setFormData({
@@ -139,60 +172,60 @@ const BecomeHost = () => {
 
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+
     // Check if adding these files would exceed the 20 photo limit
     if (formData.photos.length + files.length > 20) {
-      alert('You can only upload up to 20 photos in total');
+      alert("You can only upload up to 20 photos in total");
       return;
     }
-    
+
     // Filter out non-image files
-    const validFiles = files.filter(file => allowedTypes.includes(file.type));
-    
+    const validFiles = files.filter((file) => allowedTypes.includes(file.type));
+
     if (validFiles.length !== files.length) {
-      alert('Only JPEG and PNG images are allowed');
+      alert("Only JPEG and PNG images are allowed");
     }
-    
+
     // Create preview URLs for valid files
-    const newPhotos = validFiles.map(file => ({
+    const newPhotos = validFiles.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
-      name: file.name
+      name: file.name,
     }));
-    
+
     setFormData({
       ...formData,
-      photos: [...formData.photos, ...newPhotos]
+      photos: [...formData.photos, ...newPhotos],
     });
   };
-  
+
   const handleRemovePhoto = (index) => {
     const updatedPhotos = [...formData.photos];
-    
+
     // Revoke object URL to prevent memory leaks
     URL.revokeObjectURL(updatedPhotos[index].preview);
-    
+
     updatedPhotos.splice(index, 1);
     setFormData({
       ...formData,
-      photos: updatedPhotos
+      photos: updatedPhotos,
     });
   };
-  
+
   const handleBrowseFiles = () => {
     fileInputRef.current.click();
   };
-  
+
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
   };
-  
+
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const droppedFiles = Array.from(e.dataTransfer.files);
       const event = { target: { files: droppedFiles } };
@@ -205,38 +238,41 @@ const BecomeHost = () => {
     if (formData.photos.length === 0) {
       return [];
     }
-    
+
     setIsUploading(true);
     setUploadProgress(0);
-    
+
     try {
-      const files = formData.photos.map(photo => photo.file);
-      const uploadedImages = await uploadMultipleToCloudinary(files, (progress) => {
-        setUploadProgress(progress);
-      });
-      
+      const files = formData.photos.map((photo) => photo.file);
+      const uploadedImages = await uploadMultipleToCloudinary(
+        files,
+        (progress) => {
+          setUploadProgress(progress);
+        }
+      );
+
       // Store the Cloudinary responses
       setCloudinaryImages(uploadedImages);
-      
+
       setIsUploading(false);
       return uploadedImages;
     } catch (error) {
-      console.error('Error uploading images:', error);
+      console.error("Error uploading images:", error);
       setIsUploading(false);
-      alert('Error uploading images. Please try again.');
+      alert("Error uploading images. Please try again.");
       return [];
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Upload images to Cloudinary first
     try {
       setIsUploading(true);
       const uploadedImages = await uploadPhotos();
       setIsUploading(false);
-      
+
       // Prepare property data
       const propertyData = {
         id: Date.now(), // Generate a unique ID for the property
@@ -250,11 +286,11 @@ const BecomeHost = () => {
           state: formData.location.state,
           country: formData.location.country,
           zipCode: formData.location.zipCode,
-          coordinates: [0, 0] // These would be set by geocoding in production
+          coordinates: [0, 0], // These would be set by geocoding in production
         },
-        images: uploadedImages.map(image => ({
+        images: uploadedImages.map((image) => ({
           url: image.secure_url,
-          publicId: image.public_id
+          publicId: image.public_id,
         })),
         amenities: formData.amenities.reduce((obj, amenity) => {
           obj[amenity] = true;
@@ -264,16 +300,16 @@ const BecomeHost = () => {
           guests: formData.guests,
           bedrooms: formData.bedrooms,
           beds: formData.beds,
-          bathrooms: formData.bathrooms
+          bathrooms: formData.bathrooms,
         },
-        status: 'active', // Set as active by default
+        status: "active", // Set as active by default
         rating: null,
         reviewCount: 0,
-        bookedDates: []
+        bookedDates: [],
       };
-      
-      console.log('Property data to submit:', propertyData);
-      
+
+      console.log("Property data to submit:", propertyData);
+
       // In a real app, this would be an API call
       // const response = await fetch('/api/properties', {
       //   method: 'POST',
@@ -282,20 +318,22 @@ const BecomeHost = () => {
       //   },
       //   body: JSON.stringify(propertyData)
       // });
-      
+
       // Store the new listing in localStorage
-      const existingListings = JSON.parse(localStorage.getItem('hostListings') || '[]');
+      const existingListings = JSON.parse(
+        localStorage.getItem("hostListings") || "[]"
+      );
       const updatedListings = [...existingListings, propertyData];
-      localStorage.setItem('hostListings', JSON.stringify(updatedListings));
-      
-      alert('Your listing has been created successfully!');
-      console.log('Submitted property data:', propertyData);
-      
+      localStorage.setItem("hostListings", JSON.stringify(updatedListings));
+
+      alert("Your listing has been created successfully!");
+      console.log("Submitted property data:", propertyData);
+
       // Redirect to host listings
-      navigate('/host/listings');
+      navigate("/host/listings");
     } catch (error) {
-      console.error('Error creating property:', error);
-      alert('Error creating property. Please try again.');
+      console.error("Error creating property:", error);
+      alert("Error creating property. Please try again.");
     }
   };
 
@@ -307,7 +345,9 @@ const BecomeHost = () => {
             {/* Header */}
             <div className="p-6 border-b border-neutral-200">
               <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-neutral-800">Become a Host</h1>
+                <h1 className="text-2xl font-bold text-neutral-800">
+                  Become a Host
+                </h1>
                 <div className="text-sm font-medium text-neutral-500">
                   Step {currentStep} of {totalSteps}
                 </div>
@@ -315,8 +355,8 @@ const BecomeHost = () => {
 
               {/* Progress bar */}
               <div className="mt-4 h-2 bg-neutral-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary-500 transition-all duration-300" 
+                <div
+                  className="h-full bg-primary-500 transition-all duration-300"
                   style={{ width: `${(currentStep / totalSteps) * 100}%` }}
                 ></div>
               </div>
@@ -327,8 +367,10 @@ const BecomeHost = () => {
               {/* Step 1: Property Type */}
               {currentStep === 1 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-neutral-900 mb-6">What type of property are you listing?</h2>
-                  
+                  <h2 className="text-xl font-semibold text-neutral-900 mb-6">
+                    What type of property are you listing?
+                  </h2>
+
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 mb-3">
@@ -342,12 +384,14 @@ const BecomeHost = () => {
                             onClick={() => handlePropertyTypeSelect(type.id)}
                             className={`flex flex-col items-center justify-center p-4 border rounded-lg text-center hover:border-primary-500 transition-all ${
                               formData.propertyType === type.id
-                                ? 'border-primary-500 bg-primary-50 text-primary-700'
-                                : 'border-neutral-200 text-neutral-700'
+                                ? "border-primary-500 bg-primary-50 text-primary-700"
+                                : "border-neutral-200 text-neutral-700"
                             }`}
                           >
                             <span className="text-2xl mb-2">{type.icon}</span>
-                            <span className="text-sm font-medium">{type.label}</span>
+                            <span className="text-sm font-medium">
+                              {type.label}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -362,15 +406,21 @@ const BecomeHost = () => {
                           <button
                             key={category.id}
                             type="button"
-                            onClick={() => handlePropertyCategorySelect(category.id)}
+                            onClick={() =>
+                              handlePropertyCategorySelect(category.id)
+                            }
                             className={`flex flex-col items-center justify-center p-4 border rounded-lg text-center hover:border-primary-500 transition-all ${
                               formData.propertyCategory === category.id
-                                ? 'border-primary-500 bg-primary-50 text-primary-700'
-                                : 'border-neutral-200 text-neutral-700'
+                                ? "border-primary-500 bg-primary-50 text-primary-700"
+                                : "border-neutral-200 text-neutral-700"
                             }`}
                           >
-                            <span className="text-2xl mb-2">{category.icon}</span>
-                            <span className="text-sm font-medium">{category.label}</span>
+                            <span className="text-2xl mb-2">
+                              {category.icon}
+                            </span>
+                            <span className="text-sm font-medium">
+                              {category.label}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -382,11 +432,16 @@ const BecomeHost = () => {
               {/* Step 2: Location */}
               {currentStep === 2 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-neutral-900 mb-6">Where is your property located?</h2>
-                  
+                  <h2 className="text-xl font-semibold text-neutral-900 mb-6">
+                    Where is your property located?
+                  </h2>
+
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="address" className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label
+                        htmlFor="address"
+                        className="block text-sm font-medium text-neutral-700 mb-1"
+                      >
                         Street address
                       </label>
                       <input
@@ -402,7 +457,10 @@ const BecomeHost = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="city" className="block text-sm font-medium text-neutral-700 mb-1">
+                        <label
+                          htmlFor="city"
+                          className="block text-sm font-medium text-neutral-700 mb-1"
+                        >
                           City
                         </label>
                         <input
@@ -417,7 +475,10 @@ const BecomeHost = () => {
                       </div>
 
                       <div>
-                        <label htmlFor="state" className="block text-sm font-medium text-neutral-700 mb-1">
+                        <label
+                          htmlFor="state"
+                          className="block text-sm font-medium text-neutral-700 mb-1"
+                        >
                           State
                         </label>
                         <input
@@ -434,7 +495,10 @@ const BecomeHost = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="zipCode" className="block text-sm font-medium text-neutral-700 mb-1">
+                        <label
+                          htmlFor="zipCode"
+                          className="block text-sm font-medium text-neutral-700 mb-1"
+                        >
                           ZIP code
                         </label>
                         <input
@@ -449,7 +513,10 @@ const BecomeHost = () => {
                       </div>
 
                       <div>
-                        <label htmlFor="country" className="block text-sm font-medium text-neutral-700 mb-1">
+                        <label
+                          htmlFor="country"
+                          className="block text-sm font-medium text-neutral-700 mb-1"
+                        >
                           Country
                         </label>
                         <select
@@ -464,14 +531,18 @@ const BecomeHost = () => {
                           <option value="Mexico">Mexico</option>
                           <option value="United Kingdom">United Kingdom</option>
                           <option value="Australia">Australia</option>
+                          <option value="India">India</option>
                         </select>
                       </div>
                     </div>
 
                     <div className="mt-6">
-                      <p className="text-sm text-neutral-500 mb-2">Your address is only shared with guests after they've made a confirmed booking.</p>
+                      <p className="text-sm text-neutral-500 mb-2">
+                        Your address is only shared with guests after they've
+                        made a confirmed booking.
+                      </p>
                       <div className="h-56 bg-neutral-100 rounded-md overflow-hidden">
-                        <StaticMap 
+                        <StaticMap
                           address={formData.location.address}
                           city={formData.location.city}
                           state={formData.location.state}
@@ -486,8 +557,10 @@ const BecomeHost = () => {
               {/* Step 3: Property Details */}
               {currentStep === 3 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-neutral-900 mb-6">Tell us more about your place</h2>
-                  
+                  <h2 className="text-xl font-semibold text-neutral-900 mb-6">
+                    Tell us more about your place
+                  </h2>
+
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 mb-3">
@@ -496,7 +569,9 @@ const BecomeHost = () => {
                       <div className="flex items-center">
                         <button
                           type="button"
-                          onClick={() => handleNumberChange('guests', formData.guests - 1)}
+                          onClick={() =>
+                            handleNumberChange("guests", formData.guests - 1)
+                          }
                           className="flex-shrink-0 h-10 w-10 border border-neutral-300 rounded-full flex items-center justify-center text-neutral-700 hover:bg-neutral-100"
                         >
                           -
@@ -505,13 +580,17 @@ const BecomeHost = () => {
                           type="number"
                           name="guests"
                           value={formData.guests}
-                          onChange={(e) => handleNumberChange('guests', e.target.value)}
+                          onChange={(e) =>
+                            handleNumberChange("guests", e.target.value)
+                          }
                           className="mx-4 w-16 text-center border-none focus:outline-none focus:ring-0 text-lg font-medium"
                           min="1"
                         />
                         <button
                           type="button"
-                          onClick={() => handleNumberChange('guests', formData.guests + 1)}
+                          onClick={() =>
+                            handleNumberChange("guests", formData.guests + 1)
+                          }
                           className="flex-shrink-0 h-10 w-10 border border-neutral-300 rounded-full flex items-center justify-center text-neutral-700 hover:bg-neutral-100"
                         >
                           +
@@ -527,7 +606,12 @@ const BecomeHost = () => {
                         <div className="flex items-center">
                           <button
                             type="button"
-                            onClick={() => handleNumberChange('bedrooms', formData.bedrooms - 1)}
+                            onClick={() =>
+                              handleNumberChange(
+                                "bedrooms",
+                                formData.bedrooms - 1
+                              )
+                            }
                             className="flex-shrink-0 h-10 w-10 border border-neutral-300 rounded-full flex items-center justify-center text-neutral-700 hover:bg-neutral-100"
                           >
                             -
@@ -536,13 +620,20 @@ const BecomeHost = () => {
                             type="number"
                             name="bedrooms"
                             value={formData.bedrooms}
-                            onChange={(e) => handleNumberChange('bedrooms', e.target.value)}
+                            onChange={(e) =>
+                              handleNumberChange("bedrooms", e.target.value)
+                            }
                             className="mx-4 w-12 text-center border-none focus:outline-none focus:ring-0 text-lg font-medium"
                             min="1"
                           />
                           <button
                             type="button"
-                            onClick={() => handleNumberChange('bedrooms', formData.bedrooms + 1)}
+                            onClick={() =>
+                              handleNumberChange(
+                                "bedrooms",
+                                formData.bedrooms + 1
+                              )
+                            }
                             className="flex-shrink-0 h-10 w-10 border border-neutral-300 rounded-full flex items-center justify-center text-neutral-700 hover:bg-neutral-100"
                           >
                             +
@@ -557,7 +648,9 @@ const BecomeHost = () => {
                         <div className="flex items-center">
                           <button
                             type="button"
-                            onClick={() => handleNumberChange('beds', formData.beds - 1)}
+                            onClick={() =>
+                              handleNumberChange("beds", formData.beds - 1)
+                            }
                             className="flex-shrink-0 h-10 w-10 border border-neutral-300 rounded-full flex items-center justify-center text-neutral-700 hover:bg-neutral-100"
                           >
                             -
@@ -566,13 +659,17 @@ const BecomeHost = () => {
                             type="number"
                             name="beds"
                             value={formData.beds}
-                            onChange={(e) => handleNumberChange('beds', e.target.value)}
+                            onChange={(e) =>
+                              handleNumberChange("beds", e.target.value)
+                            }
                             className="mx-4 w-12 text-center border-none focus:outline-none focus:ring-0 text-lg font-medium"
                             min="1"
                           />
                           <button
                             type="button"
-                            onClick={() => handleNumberChange('beds', formData.beds + 1)}
+                            onClick={() =>
+                              handleNumberChange("beds", formData.beds + 1)
+                            }
                             className="flex-shrink-0 h-10 w-10 border border-neutral-300 rounded-full flex items-center justify-center text-neutral-700 hover:bg-neutral-100"
                           >
                             +
@@ -587,7 +684,12 @@ const BecomeHost = () => {
                         <div className="flex items-center">
                           <button
                             type="button"
-                            onClick={() => handleNumberChange('bathrooms', formData.bathrooms - 1)}
+                            onClick={() =>
+                              handleNumberChange(
+                                "bathrooms",
+                                formData.bathrooms - 1
+                              )
+                            }
                             className="flex-shrink-0 h-10 w-10 border border-neutral-300 rounded-full flex items-center justify-center text-neutral-700 hover:bg-neutral-100"
                           >
                             -
@@ -596,13 +698,20 @@ const BecomeHost = () => {
                             type="number"
                             name="bathrooms"
                             value={formData.bathrooms}
-                            onChange={(e) => handleNumberChange('bathrooms', e.target.value)}
+                            onChange={(e) =>
+                              handleNumberChange("bathrooms", e.target.value)
+                            }
                             className="mx-4 w-12 text-center border-none focus:outline-none focus:ring-0 text-lg font-medium"
                             min="1"
                           />
                           <button
                             type="button"
-                            onClick={() => handleNumberChange('bathrooms', formData.bathrooms + 1)}
+                            onClick={() =>
+                              handleNumberChange(
+                                "bathrooms",
+                                formData.bathrooms + 1
+                              )
+                            }
                             className="flex-shrink-0 h-10 w-10 border border-neutral-300 rounded-full flex items-center justify-center text-neutral-700 hover:bg-neutral-100"
                           >
                             +
@@ -623,12 +732,14 @@ const BecomeHost = () => {
                             onClick={() => handleAmenityToggle(amenity.id)}
                             className={`flex items-center p-3 border rounded-lg hover:border-primary-500 transition-all ${
                               formData.amenities.includes(amenity.id)
-                                ? 'border-primary-500 bg-primary-50 text-primary-700'
-                                : 'border-neutral-200 text-neutral-700'
+                                ? "border-primary-500 bg-primary-50 text-primary-700"
+                                : "border-neutral-200 text-neutral-700"
                             }`}
                           >
                             <span className="text-xl mr-2">{amenity.icon}</span>
-                            <span className="text-sm font-medium">{amenity.label}</span>
+                            <span className="text-sm font-medium">
+                              {amenity.label}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -640,35 +751,47 @@ const BecomeHost = () => {
               {/* Step 4: Photos and Description */}
               {currentStep === 4 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-neutral-900 mb-6">Add photos and description</h2>
-                  
+                  <h2 className="text-xl font-semibold text-neutral-900 mb-6">
+                    Add photos and description
+                  </h2>
+
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 mb-3">
                         Add photos of your place
                       </label>
-                      <div 
+                      <div
                         className="border-2 border-dashed border-neutral-300 rounded-lg p-8 text-center"
                         onDragOver={handleDragOver}
                         onDrop={handleDrop}
                       >
-                        <svg className="mx-auto h-12 w-12 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <svg
+                          className="mx-auto h-12 w-12 text-neutral-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
                         </svg>
                         <p className="mt-2 text-sm text-neutral-600">
-                          Drag and drop photos here or{' '}
-                          <button 
-                            type="button" 
+                          Drag and drop photos here or{" "}
+                          <button
+                            type="button"
                             onClick={handleBrowseFiles}
                             className="text-primary-600 font-medium hover:text-primary-500"
                           >
                             browse files
                           </button>
-                          <input 
+                          <input
                             ref={fileInputRef}
-                            type="file" 
-                            accept="image/jpeg, image/png" 
-                            multiple 
+                            type="file"
+                            accept="image/jpeg, image/png"
+                            multiple
                             onChange={handleFileUpload}
                             className="hidden"
                           />
@@ -677,7 +800,7 @@ const BecomeHost = () => {
                           Up to 20 photos. JPEG, PNG format only.
                         </p>
                       </div>
-                      
+
                       {/* Display uploaded photos */}
                       {formData.photos.length > 0 && (
                         <div className="mt-6">
@@ -687,8 +810,8 @@ const BecomeHost = () => {
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             {formData.photos.map((photo, index) => (
                               <div key={index} className="relative group">
-                                <img 
-                                  src={photo.preview} 
+                                <img
+                                  src={photo.preview}
                                   alt={`Property photo ${index + 1}`}
                                   className="h-32 w-full object-cover rounded-md"
                                 />
@@ -698,37 +821,56 @@ const BecomeHost = () => {
                                     onClick={() => handleRemovePhoto(index)}
                                     className="bg-white p-1.5 rounded-full text-red-500 hover:text-red-600"
                                   >
-                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    <svg
+                                      className="h-5 w-5"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                      />
                                     </svg>
                                   </button>
                                 </div>
-                                <p className="text-xs truncate mt-1">{photo.name}</p>
+                                <p className="text-xs truncate mt-1">
+                                  {photo.name}
+                                </p>
                               </div>
                             ))}
                           </div>
                         </div>
                       )}
-                      
+
                       {/* Upload progress */}
                       {isUploading && (
                         <div className="mt-4">
                           <div className="flex items-center">
                             <div className="w-full bg-neutral-200 rounded-full h-2.5">
-                              <div 
-                                className="bg-primary-500 h-2.5 rounded-full" 
+                              <div
+                                className="bg-primary-500 h-2.5 rounded-full"
                                 style={{ width: `${uploadProgress}%` }}
                               ></div>
                             </div>
-                            <span className="ml-2 text-sm text-neutral-600">{uploadProgress}%</span>
+                            <span className="ml-2 text-sm text-neutral-600">
+                              {uploadProgress}%
+                            </span>
                           </div>
-                          <p className="text-sm text-neutral-500 mt-1">Uploading photos to cloud storage...</p>
+                          <p className="text-sm text-neutral-500 mt-1">
+                            Uploading photos to cloud storage...
+                          </p>
                         </div>
                       )}
                     </div>
 
                     <div>
-                      <label htmlFor="title" className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label
+                        htmlFor="title"
+                        className="block text-sm font-medium text-neutral-700 mb-1"
+                      >
                         Title your listing
                       </label>
                       <input
@@ -743,7 +885,10 @@ const BecomeHost = () => {
                     </div>
 
                     <div>
-                      <label htmlFor="description" className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label
+                        htmlFor="description"
+                        className="block text-sm font-medium text-neutral-700 mb-1"
+                      >
                         Description
                       </label>
                       <textarea
@@ -756,8 +901,77 @@ const BecomeHost = () => {
                         placeholder="Tell potential guests what makes your place special..."
                       ></textarea>
                       <p className="mt-2 text-xs text-neutral-500">
-                        Minimum 100 characters. Highlight what makes your place unique.
+                        Minimum 100 characters. Highlight what makes your place
+                        unique.
                       </p>
+                    </div>
+
+                    {/* Language and Currency Settings */}
+                    <div className="bg-neutral-50 p-5 rounded-lg border border-neutral-200">
+                      <h3 className="text-md font-medium text-neutral-900 mb-4">
+                        Language and Currency Settings
+                      </h3>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Language Settings */}
+                        <div>
+                          <label className="block text-sm font-medium text-neutral-700 mb-2">
+                            Listing Language
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {supportedLanguages.slice(0, 4).map((lang) => (
+                              <button
+                                key={lang.code}
+                                type="button"
+                                onClick={() =>
+                                  handleLanguageChange(lang.code, lang.name)
+                                }
+                                className={`flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
+                                  language === lang.code
+                                    ? "bg-primary-50 text-primary-600 font-medium border border-primary-200"
+                                    : "text-neutral-700 hover:bg-neutral-50 border border-neutral-200 hover:border-neutral-300"
+                                }`}
+                              >
+                                <span>{lang.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                          <p className="mt-2 text-xs text-neutral-500">
+                            Language your listing details will be translated to
+                            for international guests.
+                          </p>
+                        </div>
+
+                        {/* Currency Settings */}
+                        <div>
+                          <label className="block text-sm font-medium text-neutral-700 mb-2">
+                            Listing Currency
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {currencies.slice(0, 4).map((curr) => (
+                              <button
+                                key={curr.code}
+                                type="button"
+                                onClick={() => handleCurrencyChange(curr.code)}
+                                className={`flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
+                                  currency === curr.code
+                                    ? "bg-primary-50 text-primary-600 font-medium border border-primary-200"
+                                    : "text-neutral-700 hover:bg-neutral-50 border border-neutral-200 hover:border-neutral-300"
+                                }`}
+                              >
+                                <span className="mr-1 font-medium">
+                                  {curr.symbol}
+                                </span>
+                                <span>{curr.code}</span>
+                              </button>
+                            ))}
+                          </div>
+                          <p className="mt-2 text-xs text-neutral-500">
+                            Currency you'll receive payments in. This affects
+                            how your pricing is displayed.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -766,16 +980,23 @@ const BecomeHost = () => {
               {/* Step 5: Pricing */}
               {currentStep === 5 && (
                 <div>
-                  <h2 className="text-xl font-semibold text-neutral-900 mb-6">Set your price</h2>
-                  
+                  <h2 className="text-xl font-semibold text-neutral-900 mb-6">
+                    Set your price
+                  </h2>
+
                   <div className="space-y-6">
                     <div>
-                      <label htmlFor="price" className="block text-sm font-medium text-neutral-700 mb-1">
+                      <label
+                        htmlFor="price"
+                        className="block text-sm font-medium text-neutral-700 mb-1"
+                      >
                         Nightly price
                       </label>
                       <div className="relative mt-1 rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span className="text-neutral-500 sm:text-sm">$</span>
+                          <span className="text-neutral-500 sm:text-sm">
+                            {formatPrice(1).charAt(0)}
+                          </span>
                         </div>
                         <input
                           type="text"
@@ -787,32 +1008,71 @@ const BecomeHost = () => {
                           placeholder="0.00"
                         />
                         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                          <span className="text-neutral-500 sm:text-sm">USD</span>
+                          <span className="text-neutral-500 sm:text-sm">
+                            {currency}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     <div className="bg-neutral-50 p-4 rounded-lg">
-                      <h3 className="text-sm font-medium text-neutral-900 mb-3">Price preview</h3>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-neutral-600">Base price</span>
-                        <span className="text-sm font-medium text-neutral-900">${formData.price || 0}</span>
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-neutral-600">Smart Rent service fee (3%)</span>
-                        <span className="text-sm font-medium text-neutral-900">${formData.price ? (parseFloat(formData.price) * 0.03).toFixed(2) : '0.00'}</span>
-                      </div>
-                      <div className="flex items-center justify-between pt-2 border-t border-neutral-200 mt-2">
-                        <span className="text-sm font-medium text-neutral-900">You'll receive</span>
-                        <span className="text-sm font-medium text-neutral-900">${formData.price ? (parseFloat(formData.price) * 0.97).toFixed(2) : '0.00'}</span>
-                      </div>
+                      <h3 className="text-sm font-medium text-neutral-900 mb-3">
+                        Price preview
+                      </h3>
+                      {isLoadingRates ? (
+                        <div className="flex justify-center py-4">
+                          <i className="fas fa-spinner fa-spin text-primary-500 mr-2"></i>
+                          <span className="text-neutral-700">
+                            Loading price preview...
+                          </span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm text-neutral-600">
+                              Base price
+                            </span>
+                            <span className="text-sm font-medium text-neutral-900">
+                              {formatPrice(formData.price || 0)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm text-neutral-600">
+                              Smart Rent service fee (3%)
+                            </span>
+                            <span className="text-sm font-medium text-neutral-900">
+                              {formatPrice(
+                                formData.price
+                                  ? parseFloat(formData.price) * 0.03
+                                  : 0
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between pt-2 border-t border-neutral-200 mt-2">
+                            <span className="text-sm font-medium text-neutral-900">
+                              You'll receive
+                            </span>
+                            <span className="text-sm font-medium text-neutral-900">
+                              {formatPrice(
+                                formData.price
+                                  ? parseFloat(formData.price) * 0.97
+                                  : 0
+                              )}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="bg-primary-50 p-4 rounded-lg border border-primary-100">
-                      <h3 className="text-sm font-medium text-primary-800 mb-2">Pricing tips</h3>
+                      <h3 className="text-sm font-medium text-primary-800 mb-2">
+                        Pricing tips
+                      </h3>
                       <p className="text-sm text-primary-700">
-                        Properties similar to yours in this area usually range from $75 to $125 per night. 
-                        Setting a competitive price can help you get more bookings, especially when you're just starting out.
+                        Properties similar to yours in this area usually range
+                        from {formatPrice(75)} to {formatPrice(125)} per night.
+                        Setting a competitive price can help you get more
+                        bookings, especially when you're just starting out.
                       </p>
                     </div>
                   </div>
@@ -861,7 +1121,15 @@ const BecomeHost = () => {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-neutral-500">
-              By becoming a host, you agree to our <a href="#" className="text-primary-600 hover:text-primary-500">Terms of Service</a> and <a href="#" className="text-primary-600 hover:text-primary-500">Host Policies</a>.
+              By becoming a host, you agree to our{" "}
+              <a href="#" className="text-primary-600 hover:text-primary-500">
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a href="#" className="text-primary-600 hover:text-primary-500">
+                Host Policies
+              </a>
+              .
             </p>
           </div>
         </div>
@@ -870,4 +1138,4 @@ const BecomeHost = () => {
   );
 };
 
-export default BecomeHost; 
+export default BecomeHost;
