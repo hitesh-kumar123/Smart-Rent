@@ -39,6 +39,14 @@ const passwordResetRequestSchema = Joi.object({
   email: Joi.string().email().required(),
 });
 
+const resetPasswordSchema = Joi.object({
+  password: Joi.string().min(6).required(),
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("password"))
+    .required()
+    .messages({ "any.only": "Confirm password must match password" }),
+});
+
 // Property validation schema
 const propertySchema = Joi.object({
   title: Joi.string().min(3).max(100).required(),
@@ -129,6 +137,7 @@ module.exports = {
   updateUserSchema,
   passwordSchema,
   passwordResetRequestSchema,
+  resetPasswordSchema,
   propertySchema,
   bookingSchema,
   reviewSchema,
