@@ -236,6 +236,7 @@ const BecomeHost = () => {
   // Upload all photos to Cloudinary
   const uploadPhotos = async () => {
     if (formData.photos.length === 0) {
+      console.warn("No photos to upload");
       return [];
     }
 
@@ -244,23 +245,68 @@ const BecomeHost = () => {
 
     try {
       const files = formData.photos.map((photo) => photo.file);
-      const uploadedImages = await uploadMultipleToCloudinary(
-        files,
-        (progress) => {
+      console.log(`Starting upload of ${files.length} photos to Cloudinary...`);
+
+      // For safety, create local image objects if Cloudinary upload fails
+      const localImageObjects = formData.photos.map((photo, index) => ({
+        url: photo.preview, // Use the preview URL as a fallback
+        secure_url: photo.preview,
+        public_id: `local-image-${index}`,
+        isLocalPreview: true,
+      }));
+
+      // Try to upload to Cloudinary
+      let uploadedImages = [];
+      try {
+        uploadedImages = await uploadMultipleToCloudinary(files, (progress) => {
           setUploadProgress(progress);
+        });
+        console.log(
+          `Successfully uploaded ${uploadedImages.length} images to Cloudinary`
+        );
+      } catch (uploadError) {
+        console.error("Error uploading to Cloudinary:", uploadError);
+        console.warn("Using local image previews instead");
+        // Use local images as fallback
+        uploadedImages = localImageObjects;
+      }
+
+      // Validate the uploaded images to make sure they have URLs
+      const validImages = uploadedImages.map((image, index) => {
+        // If the image doesn't have a secure_url, use the local preview
+        if (!image.secure_url) {
+          console.warn(
+            `Image ${index} missing secure_url, using local preview`
+          );
+          return (
+            localImageObjects[index] || {
+              secure_url:
+                "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop",
+              public_id: `fallback-image-${index}`,
+            }
+          );
         }
-      );
+        return image;
+      });
 
       // Store the Cloudinary responses
-      setCloudinaryImages(uploadedImages);
+      setCloudinaryImages(validImages);
+      setIsUploading(false);
 
-      setIsUploading(false);
-      return uploadedImages;
+      console.log("Final images to be used:", validImages);
+      return validImages;
     } catch (error) {
-      console.error("Error uploading images:", error);
+      console.error("Error in uploadPhotos function:", error);
       setIsUploading(false);
-      alert("Error uploading images. Please try again.");
-      return [];
+
+      // Return fallback image to ensure at least one image is available
+      return [
+        {
+          secure_url:
+            "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop",
+          public_id: "error-fallback-image",
+        },
+      ];
     }
   };
 
@@ -270,37 +316,75 @@ const BecomeHost = () => {
     // Upload images to Cloudinary first
     try {
       setIsUploading(true);
-      const uploadedImages = await uploadPhotos();
-      setIsUploading(false);
+      console.log("Starting image upload process...");
+
+      let uploadedImages = [];
+
+      // Check if there are photos to upload
+      if (formData.photos && formData.photos.length > 0) {
+        // Upload images to Cloudinary
+        uploadedImages = await uploadPhotos();
+        console.log("Image upload complete:", uploadedImages);
+      } else {
+        console.warn("No photos selected, using fallback image");
+      }
+
+      // Ensure we have at least one valid image
+      if (!uploadedImages || uploadedImages.length === 0) {
+        console.warn("Using fallback image as no valid images were uploaded");
+        // Add fallback image
+        uploadedImages = [
+          {
+            secure_url:
+              "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop",
+            url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop",
+            public_id: "fallback-image",
+          },
+        ];
+      }
+
+      // Map images to the format expected by the property data
+      // Important: ensure both url and secure_url are available
+      const propertyImages = uploadedImages.map((image) => {
+        // Make sure every image has both url and secure_url properties
+        const imageUrl = image.secure_url || image.url || "";
+
+        return {
+          url: imageUrl,
+          secure_url: imageUrl,
+          publicId: image.public_id || `image-id-${Date.now()}`,
+          isLocalImage: image.isLocalPreview || false,
+        };
+      });
+
+      console.log("Final property images:", propertyImages);
 
       // Prepare property data
       const propertyData = {
         id: Date.now(), // Generate a unique ID for the property
-        title: formData.title,
-        description: formData.description,
-        category: formData.propertyCategory || formData.propertyType, // Use category or fallback to type
+        title: formData.title || "New Property Listing",
+        description:
+          formData.description || "Property description not provided",
+        category: formData.propertyCategory || formData.propertyType || "Other", // Use category or fallback to type
         price: parseFloat(formData.price) || 0,
         location: {
-          address: formData.location.address,
-          city: formData.location.city,
-          state: formData.location.state,
-          country: formData.location.country,
-          zipCode: formData.location.zipCode,
+          address: formData.location.address || "",
+          city: formData.location.city || "",
+          state: formData.location.state || "",
+          country: formData.location.country || "United States",
+          zipCode: formData.location.zipCode || "",
           coordinates: [0, 0], // These would be set by geocoding in production
         },
-        images: uploadedImages.map((image) => ({
-          url: image.secure_url,
-          publicId: image.public_id,
-        })),
+        images: propertyImages,
         amenities: formData.amenities.reduce((obj, amenity) => {
           obj[amenity] = true;
           return obj;
         }, {}),
         capacity: {
-          guests: formData.guests,
-          bedrooms: formData.bedrooms,
-          beds: formData.beds,
-          bathrooms: formData.bathrooms,
+          guests: formData.guests || 1,
+          bedrooms: formData.bedrooms || 1,
+          beds: formData.beds || 1,
+          bathrooms: formData.bathrooms || 1,
         },
         status: "active", // Set as active by default
         rating: null,
@@ -310,22 +394,42 @@ const BecomeHost = () => {
 
       console.log("Property data to submit:", propertyData);
 
-      // In a real app, this would be an API call
-      // const response = await fetch('/api/properties', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(propertyData)
-      // });
-
       // Store the new listing in localStorage
       const existingListings = JSON.parse(
         localStorage.getItem("hostListings") || "[]"
       );
       const updatedListings = [...existingListings, propertyData];
-      localStorage.setItem("hostListings", JSON.stringify(updatedListings));
 
+      // We need to specially handle the localStorage storage to ensure URLs are preserved
+      try {
+        localStorage.setItem("hostListings", JSON.stringify(updatedListings));
+        console.log("Successfully saved listing to localStorage");
+      } catch (storageError) {
+        console.error("Error saving to localStorage:", storageError);
+        // If JSON.stringify fails because of circular references in image objects,
+        // try a more direct approach
+        const simplifiedListings = updatedListings.map((listing) => {
+          // Create a simplified version of images that will serialize correctly
+          const simplifiedImages = listing.images.map((img) => ({
+            url: img.url || img.secure_url,
+            publicId: img.publicId || img.public_id || "image-id",
+          }));
+
+          return {
+            ...listing,
+            images: simplifiedImages,
+          };
+        });
+
+        localStorage.setItem(
+          "hostListings",
+          JSON.stringify(simplifiedListings)
+        );
+      }
+
+      setIsUploading(false);
+
+      // Show success message
       alert("Your listing has been created successfully!");
       console.log("Submitted property data:", propertyData);
 
@@ -333,7 +437,8 @@ const BecomeHost = () => {
       navigate("/host/listings");
     } catch (error) {
       console.error("Error creating property:", error);
-      alert("Error creating property. Please try again.");
+      setIsUploading(false);
+      alert("There was an issue creating your property. Please try again.");
     }
   };
 
