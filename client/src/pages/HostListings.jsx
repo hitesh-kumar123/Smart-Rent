@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
+// Fallback image in case property image fails to load
+const FALLBACK_IMAGE_URL =
+  "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop";
+
 const HostListings = () => {
   // State to manage the active tab filter (all, active, or inactive listings)
   const [activeTab, setActiveTab] = useState("all");
@@ -8,6 +12,81 @@ const HostListings = () => {
   const [listings, setListings] = useState([]);
   // State to track loading status while fetching listings
   const [loading, setLoading] = useState(true);
+  // Track image loading errors
+  const [imgErrors, setImgErrors] = useState({});
+  // Track loading state for image
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Handle image load errors
+  const handleImageError = (listingId) => {
+    setImgErrors((prev) => ({
+      ...prev,
+      [listingId]: true,
+    }));
+    console.error(`Failed to load image for listing ${listingId}`);
+  };
+
+  // Check if an image URL exists and is valid
+  const getValidImageUrl = (listing) => {
+    // If we've already determined this image has an error, use fallback
+    if (imgErrors[listing.id]) {
+      console.log(
+        `Using fallback for listing ${listing.id} due to previous error`
+      );
+      return FALLBACK_IMAGE_URL;
+    }
+
+    // Check if images array exists
+    if (
+      !listing.images ||
+      !Array.isArray(listing.images) ||
+      listing.images.length === 0
+    ) {
+      console.log(`No images array for listing ${listing.id}`);
+      return FALLBACK_IMAGE_URL;
+    }
+
+    // Get the first image
+    const imageObject = listing.images[0];
+
+    // Check if we have a valid image object
+    if (!imageObject) {
+      console.log(`Invalid image object for listing ${listing.id}`);
+      return FALLBACK_IMAGE_URL;
+    }
+
+    // Check for various possible image URL formats
+    try {
+      // Handle different URL formats
+      if (typeof imageObject === "string") {
+        return imageObject; // If the image is directly a string URL
+      } else if (imageObject.secure_url) {
+        return imageObject.secure_url;
+      } else if (imageObject.url) {
+        return imageObject.url;
+      } else if (
+        imageObject.publicId &&
+        imageObject.publicId.startsWith("local-")
+      ) {
+        // This might be a local image from Object URL
+        if (imageObject.url) return imageObject.url;
+        return FALLBACK_IMAGE_URL;
+      }
+
+      // No valid URL found
+      console.log(
+        `No valid URL in image object for listing ${listing.id}`,
+        imageObject
+      );
+      return FALLBACK_IMAGE_URL;
+    } catch (error) {
+      console.error(
+        `Error getting image URL for listing ${listing.id}:`,
+        error
+      );
+      return FALLBACK_IMAGE_URL;
+    }
+  };
 
   // Fetch user's listings (in a real app this would call the API)
   useEffect(() => {
@@ -19,9 +98,75 @@ const HostListings = () => {
         // const data = await response.json();
 
         // Get any newly created listings from localStorage if available
-        const newListings = JSON.parse(
-          localStorage.getItem("hostListings") || "[]"
-        );
+        let newListings = [];
+        try {
+          const storedListings = localStorage.getItem("hostListings");
+          if (storedListings) {
+            // Parse the stored listings
+            newListings = JSON.parse(storedListings);
+            console.log("Loaded listings from localStorage:", newListings);
+
+            // Process the listings to ensure images are properly formatted
+            newListings = newListings.map((listing) => {
+              // Ensure images is an array
+              if (!listing.images || !Array.isArray(listing.images)) {
+                console.warn(`Fixing missing images for listing ${listing.id}`);
+                listing.images = [
+                  {
+                    url: FALLBACK_IMAGE_URL,
+                    secure_url: FALLBACK_IMAGE_URL,
+                    publicId: "fallback-storage-fix",
+                  },
+                ];
+              }
+
+              // Validate each image has a URL
+              listing.images = listing.images.map((image) => {
+                // Convert string images to objects
+                if (typeof image === "string") {
+                  return {
+                    url: image,
+                    secure_url: image,
+                    publicId: "converted-image",
+                  };
+                }
+
+                // Make sure we have both url and secure_url
+                if (!image.url && image.secure_url) {
+                  image.url = image.secure_url;
+                } else if (!image.secure_url && image.url) {
+                  image.secure_url = image.url;
+                }
+
+                // Check if we have either URL and fix property names
+                if (image.publicId && !image.public_id) {
+                  image.public_id = image.publicId;
+                } else if (image.public_id && !image.publicId) {
+                  image.publicId = image.public_id;
+                }
+
+                // If still no URL, use fallback
+                if (!image.url && !image.secure_url) {
+                  return {
+                    url: FALLBACK_IMAGE_URL,
+                    secure_url: FALLBACK_IMAGE_URL,
+                    publicId: "fallback-storage-fix",
+                  };
+                }
+
+                return image;
+              });
+
+              return listing;
+            });
+          }
+        } catch (storageError) {
+          console.error(
+            "Error loading listings from localStorage:",
+            storageError
+          );
+          newListings = [];
+        }
 
         // Combine with mock data
         const allListings = [...mockListings, ...newListings];
@@ -35,6 +180,63 @@ const HostListings = () => {
 
     fetchListings();
   }, []);
+
+  // Prefetch the listing images to ensure they load correctly
+  useEffect(() => {
+    if (!loading && listings.length > 0) {
+      // Prefetch all listing images
+      let loadedImages = 0;
+      const totalImages = listings.length;
+
+      listings.forEach((listing) => {
+        if (
+          listing.images &&
+          listing.images.length > 0 &&
+          (listing.images[0].url || listing.images[0].secure_url)
+        ) {
+          const imageUrl =
+            listing.images[0].url || listing.images[0].secure_url;
+          const img = new Image();
+
+          // Handle successful image load
+          img.onload = () => {
+            loadedImages++;
+            if (loadedImages >= totalImages) {
+              setIsLoading(false);
+            }
+          };
+
+          // Handle image error
+          img.onerror = () => {
+            // Mark this image as errored
+            handleImageError(listing.id);
+            loadedImages++;
+            if (loadedImages >= totalImages) {
+              setIsLoading(false);
+            }
+          };
+
+          // Start loading the image
+          img.src = imageUrl;
+        } else {
+          // No valid image URL found
+          handleImageError(listing.id);
+          loadedImages++;
+          if (loadedImages >= totalImages) {
+            setIsLoading(false);
+          }
+        }
+      });
+
+      // Safety timeout to make sure loading state is cleared even if image loading fails
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 3000);
+    } else {
+      // No listings or still loading listings
+      setIsLoading(false);
+    }
+  }, [listings, loading]);
 
   // Mock data for host's listings
   const mockListings = [
@@ -279,16 +481,26 @@ const HostListings = () => {
               >
                 <div className="md:flex">
                   {/* Property image */}
-                  <div className="md:flex-shrink-0 md:w-1/4">
-                    <img
-                      className="h-48 w-full object-cover md:h-full"
-                      src={
-                        listing.images && listing.images.length > 0
-                          ? listing.images[0].url
-                          : "https://placehold.co/600x400?text=No+Image"
-                      }
-                      alt={listing.title}
-                    />
+                  <div className="md:flex-shrink-0 md:w-1/4 relative">
+                    {isLoading ? (
+                      <div className="h-48 w-full bg-neutral-200 animate-pulse"></div>
+                    ) : (
+                      <>
+                        <img
+                          className="h-48 w-full object-cover md:h-full"
+                          src={getValidImageUrl(listing)}
+                          alt={listing.title || "Property image"}
+                          onError={() => handleImageError(listing.id)}
+                        />
+                        {imgErrors[listing.id] && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-neutral-100 bg-opacity-30">
+                            <div className="text-xs text-center px-2 py-1 bg-white bg-opacity-90 rounded">
+                              Using backup image
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                   <div className="p-6 md:w-3/4">
                     {/* Property header with title, location, and status */}
