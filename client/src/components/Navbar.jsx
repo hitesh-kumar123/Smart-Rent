@@ -167,7 +167,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white border-b border-neutral-200 py-4 px-4 md:px-6 sticky top-0 z-20">
+    <nav className="bg-white  py-4 px-4 md:px-6 sticky top-0 z-20">
       <div className="container mx-auto">
         {/* Main navigation bar with logo and menu items */}
         <div className="flex justify-between items-center">
