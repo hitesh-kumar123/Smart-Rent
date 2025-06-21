@@ -932,7 +932,7 @@ const Listings = () => {
   return (
     <div className="bg-neutral-50 min-h-screen mt-2">
       {/* Categories */}
-      <div className="sticky top-16 z-10 bg-white shadow-sm py-4 border-b border-neutral-200">
+      <div className="sticky top-[82px] z-30 bg-white shadow-sm py-4 border-b border-neutral-200">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
             <div className="relative flex-grow overflow-hidden">
