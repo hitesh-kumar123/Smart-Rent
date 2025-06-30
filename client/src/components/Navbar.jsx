@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppSettings } from "../contexts/AppSettingsContext";
 import { useAuth } from "../contexts/AuthContext";
+import logo from "../assets/logo1.png";
+// import { Link } from "react-router-dom";
 
 /**
  * Navbar Component
@@ -170,23 +172,39 @@ const Navbar = () => {
     <nav className="bg-white  py-4 px-4 md:px-6 sticky top-0 z-20">
       <div className="container mx-auto">
         {/* Main navigation bar with logo and menu items */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center ">
           {/* Logo */}
 
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center ">
+            {/* Smart Rent System Logo SVG */}
             <svg
-              className="h-8 w-8 text-primary-500"
-              fill="currentColor"
-              viewBox="0 0 24 24"
+              className="h-12 w-12"
+              viewBox="0 0 100 100"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <path d="M22.5 2h-21c-0.828 0-1.5 0.672-1.5 1.5v14.988c0 0.828 0.672 1.5 1.5 1.5h6.5v2.012h-2c-0.553 0-1 0.447-1 1s0.447 1 1 1h11c0.553 0 1-0.447 1-1s-0.447-1-1-1h-2v-2.012h6.5c0.828 0 1.5-0.672 1.5-1.5v-14.988c0-0.828-0.672-1.5-1.5-1.5zM16 19.988h-8v-2.012h8v2.012zM22 16.488h-20v-12.988h20v12.988z"></path>
+              {/* Location Pin Shape */}
+              <path
+                d="M50 10C35.088 10 23 22.088 23 37C23 52.5 46.5 85 50 90C53.5 85 77 52.5 77 37C77 22.088 64.912 10 50 10Z"
+                fill="#E53E3E"
+                stroke="#E53E3E"
+                strokeWidth="2"
+              />
+
+              {/* House Icon Inside Pin */}
+              <path d="M50 25L40 35V50H45V40H55V50H60V35L50 25Z" fill="white" />
+              <rect x="42" y="42" width="4" height="8" fill="white" />
+              <path d="M38 35L50 23L62 35H60L50 25L40 35H38Z" fill="white" />
             </svg>
 
             {/* Logo text */}
-            <div className="ml-2 text-3xl font-extrabold">
-              <span className="text-neutral-800 hover:text-primary-500 transition-colors duration-300">
-                Smart Rent<span className="text-primary-500 "></span> System
-              </span>
+            <div className="ml-3">
+              <div className="text-2xl md:text-3xl font-bold text-neutral-800 hover:text-red-500 transition-colors duration-300">
+                Smart Rent
+              </div>
+              <div className="text-base md:text-lg font-medium text-red-500 -mt-1 tracking-wider">
+                SYSTEM
+              </div>
             </div>
           </Link>
 
