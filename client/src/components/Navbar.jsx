@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppSettings } from "../contexts/AppSettingsContext";
 import { useAuth } from "../contexts/AuthContext";
-import logo from "../assets/logo1.png";
-// import { Link } from "react-router-dom";
+import logoSvg from "../logo.svg";
 
 /**
  * Navbar Component
@@ -175,34 +174,20 @@ const Navbar = () => {
         <div className="flex justify-between items-center ">
           {/* Logo */}
 
-          <Link to="/" className="flex items-center ">
-            {/* Smart Rent System Logo SVG */}
-            <svg
-              className="h-12 w-12"
-              viewBox="0 0 100 100"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {/* Location Pin Shape */}
-              <path
-                d="M50 10C35.088 10 23 22.088 23 37C23 52.5 46.5 85 50 90C53.5 85 77 52.5 77 37C77 22.088 64.912 10 50 10Z"
-                fill="#E53E3E"
-                stroke="#E53E3E"
-                strokeWidth="2"
-              />
-
-              {/* House Icon Inside Pin */}
-              <path d="M50 25L40 35V50H45V40H55V50H60V35L50 25Z" fill="white" />
-              <rect x="42" y="42" width="4" height="8" fill="white" />
-              <path d="M38 35L50 23L62 35H60L50 25L40 35H38Z" fill="white" />
-            </svg>
-
+          <Link to="/" className="flex items-center ml-5 ">
+            {/* Logo image (SVG) */}
+            <img
+              src={logoSvg}
+              alt="Smart Rent System Logo"
+              className="h-14 w-14 object-contain"
+              style={{ maxWidth: 48 }}
+            />
             {/* Logo text */}
             <div className="ml-3">
-              <div className="text-2xl md:text-3xl font-bold text-neutral-800 hover:text-red-500 transition-colors duration-300">
+              <div className="text-xl md:text-2xl font-bold text-neutral-800 hover:text-red-500 transition-colors duration-300">
                 Smart Rent
               </div>
-              <div className="text-base md:text-lg font-medium text-red-500 -mt-1 tracking-wider">
+              <div className="text-sm md:text-base font-medium text-red-500 -mt-1 tracking-wider">
                 SYSTEM
               </div>
             </div>
@@ -210,7 +195,7 @@ const Navbar = () => {
 
           {/* Explore Button - Added next to the logo */}
           {location.pathname === "/" && (
-            <div className="hidden md:block ml-6">
+            <div className="hidden md:block ml-12">
               <Link
                 to="/listings"
                 className="flex items-center px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-full transition duration-300 shadow-sm hover:shadow-md gap-2"
