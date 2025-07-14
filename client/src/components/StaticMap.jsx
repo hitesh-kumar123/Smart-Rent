@@ -1,64 +1,104 @@
-import React from "react";
-import icon from "leaflet/dist/images/marker-icon.png";
-import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import React, { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import ClientOnly from "./ClientOnly";
 
-const StaticMap = ({ address, city, state, country, zoom = 13 }) => {
-  // Combine address components into a single query string
-  const locationQuery = [address, city, state, country]
-    .filter(Boolean)
-    .join(",+");
+// Fix Leaflet's default icon issue
+const DefaultIcon = L.icon({
+  iconUrl: require("leaflet/dist/images/marker-icon.png"),
+  iconShadow: require("leaflet/dist/images/marker-shadow.png"),
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
 
-  // Use Google Maps Static API - no API key for now, which limits usage but works for demo
-  const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(locationQuery)}&zoom=${zoom}&size=600x400&markers=color:red%7C${encodeURIComponent(locationQuery)}&key=`;
+L.Marker.prototype.options.icon = DefaultIcon;
 
-  // Fallback image when no location is provided
-  const fallbackMapUrl =
-    "https://maps.googleapis.com/maps/api/staticmap?center=New+York&zoom=12&size=600x400&key=";
+const LoadingSpinner = () => (
+  <div className="h-[400px] w-full bg-neutral-100 rounded-lg flex items-center justify-center">
+    <div className="flex flex-col items-center">
+      <div className="h-12 w-12 animate-spin border-4 border-neutral-300 border-t-primary-500 rounded-full mb-4"></div>
+      <p className="text-neutral-500">Loading map...</p>
+    </div>
+  </div>
+);
 
-  const displayUrl = locationQuery ? mapUrl : fallbackMapUrl;
+const StaticMap = ({ address, city, state, country, zoom = 13, isConfirmedBooking = false }) => {
+  const [position, setPosition] = useState([40.7128, -74.006]); // New York as fallback
+  const [loading, setLoading] = useState(false);
+  const [locationName, setLocationName] = useState("");
 
-  let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-  });
+  useEffect(() => {
+    const locationQuery = [city, state, country].filter(Boolean).join(", ");
+    if (!locationQuery) return;
 
-  L.Marker.prototype.options.icon = DefaultIcon;
+    setLoading(true);
+    // Use less precise location when not a confirmed booking
+    const searchQuery = isConfirmedBooking ? [address, locationQuery].filter(Boolean).join(", ") : locationQuery;
+
+    fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        searchQuery
+      )}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.length > 0) {
+          setPosition([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+          // Set location name based on booking status
+          setLocationName(isConfirmedBooking 
+            ? [address, city, state, country].filter(Boolean).join(", ")
+            : [city, state, country].filter(Boolean).join(", "));
+        }
+      })
+      .catch((error) => {
+        console.error("Geocoding error:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [address, city, state, country, isConfirmedBooking]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
-    <div className="relative h-full w-full bg-neutral-100 flex items-center justify-center">
-      {locationQuery ? (
-        <img
-          src={displayUrl}
-          alt={`Map of ${locationQuery}`}
-          className="w-full h-full object-cover rounded-md"
-        />
-      ) : (
-        <div className="flex flex-col items-center justify-center">
-          <div className="h-48 w-48 bg-neutral-200 rounded-full flex items-center justify-center mb-4">
-            <svg
-              className="h-12 w-12 text-neutral-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-              />
-            </svg>
-          </div>
-          <p className="text-neutral-500 text-center">
-            Enter an address to see the location on the map
-          </p>
+    <div className="h-[400px] w-full bg-neutral-100 rounded-lg">
+      <ClientOnly>
+        <div className="h-full w-full relative">
+          <MapContainer
+            center={position}
+            zoom={zoom}
+            scrollWheelZoom={false}
+            style={{ height: "100%", width: "100%", borderRadius: "0.5rem" }}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={position}>
+              <Popup>
+                {isConfirmedBooking ? (
+                  <span>{locationName}</span>
+                ) : (
+                  <div>
+                    <p>{locationName}</p>
+                    <p className="text-sm text-neutral-500 mt-1">
+                      Exact location shared after booking
+                    </p>
+                  </div>
+                )}
+              </Popup>
+            </Marker>
+          </MapContainer>
         </div>
-      )}
+      </ClientOnly>
     </div>
   );
 };
 
 export default StaticMap;
+

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import PropertyImage from "../components/PropertyImage";
+import StaticMap from "../components/StaticMap";
 import { dummyProperties } from "../data/dummyProperties";
 
 const PropertyDetail = () => {
@@ -25,6 +26,7 @@ const PropertyDetail = () => {
     checkOut: "",
     guests: 1,
   });
+  const [isBooked, setIsBooked] = useState(false);
 
   useEffect(() => {
     const fetchPropertyDetails = async () => {
@@ -161,6 +163,22 @@ const PropertyDetail = () => {
       }
     };
   }, [id]);
+
+  useEffect(() => {
+    const checkBookingStatus = async () => {
+      try {
+        const response = await axios.get(`/api/bookings/check/${id}`);
+        setIsBooked(response.data.isConfirmed);
+      } catch (error) {
+        console.error("Error checking booking status:", error);
+        setIsBooked(false);
+      }
+    };
+
+    if (property) {
+      checkBookingStatus();
+    }
+  }, [id, property]);
 
   const handleSave = async () => {
     try {
@@ -706,17 +724,27 @@ const PropertyDetail = () => {
                       Where you'll be
                     </h3>
                     <p className="text-neutral-700 mb-4">
-                      {property.location && property.location.city
-                        ? `${property.location.city}, ${
-                            property.location.country || ""
-                          }`
+                      {property.city
+                        ? `${property.city}, ${property.state || ""}, ${property.country || ""}`
                         : "Location details not available"}
                     </p>
-                    <div className="bg-neutral-100 h-64 rounded-lg flex flex-col items-center justify-center w-full">
-                      <p className="text-neutral-500 mb-4">
-                        Map view not available
-                      </p>
+                    <div className="h-[400px] w-full rounded-lg overflow-hidden">
+                      <StaticMap
+                        address={isBooked ? property.address : undefined}
+                        city={property.city}
+                        state={property.state}
+                        country={property.country}
+                        isConfirmedBooking={isBooked}
+                        zoom={13}
+                      />
                     </div>
+                    {!isBooked && (
+                      <p className="mt-4 text-sm text-neutral-500">
+                        <i className="fas fa-info-circle mr-2"></i>
+                        Exact location will be provided after your booking is
+                        confirmed
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

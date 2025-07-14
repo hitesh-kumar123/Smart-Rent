@@ -38,7 +38,6 @@
     "passport": "^0.7.0",
     "passport-local-mongoose": "^8.0.0",
     "pdfkit": "^0.16.0",
-    "react-leaflet": "^5.0.0",
     "resend": "^4.2.0",
     "socket.io": "^4.8.1"
   },

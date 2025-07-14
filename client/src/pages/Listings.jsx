@@ -8,6 +8,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import PropertyImage from "../components/PropertyImage";
+import StaticMap from "../components/StaticMap";
 import { useAppSettings } from "../contexts/AppSettingsContext";
 
 const Listings = () => {
@@ -932,7 +933,7 @@ const Listings = () => {
   return (
     <div className="bg-neutral-50 min-h-screen mt-2">
       {/* Categories */}
-     <div className="sticky top-[72px] z-30 bg-white py-4 border-b border-gray-200 transition-all duration-200 ease-in-out">
+      <div className="sticky top-[72px] z-30 bg-white py-4 border-b border-gray-200 transition-all duration-200 ease-in-out">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
             <div className="relative flex-grow overflow-hidden">
