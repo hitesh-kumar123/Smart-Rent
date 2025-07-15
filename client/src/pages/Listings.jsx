@@ -1758,7 +1758,10 @@ const dummyProperties = [
       parking: true,
     },
     images: [
-      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8aG91c2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=600&q=60",
+      "https://unsplash.com/photos/white-concrete-building-during-daytime-gxyeia7Syuk",
+      // "https://unsplash.com/photos/white-concrete-building-during-daytime-gxyeia7Syuk",
+      // "https://unsplash.com/photos/white-concrete-building-during-daytime-gxyeia7Syuk",
+      // "https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8aG91c2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=600&q=60",
     ],
   },
   {

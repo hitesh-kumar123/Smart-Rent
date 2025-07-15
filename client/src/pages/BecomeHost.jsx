@@ -332,7 +332,7 @@ const BecomeHost = () => {
       // Ensure we have at least one valid image
       if (!uploadedImages || uploadedImages.length === 0) {
         console.warn("Using fallback image as no valid images were uploaded");
-        // Add fallback image
+        // Add fallback image if no images were uploaded
         uploadedImages = [
           {
             secure_url:
