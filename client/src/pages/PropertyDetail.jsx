@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import PropertyImage from "../components/PropertyImage";
 import StaticMap from "../components/StaticMap";
-import { dummyProperties } from "../data/dummyProperties";
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -34,134 +33,73 @@ const PropertyDetail = () => {
         setLoading(true);
         setError(false);
 
-        console.log("Fetching property with ID:", id);
+        console.log("Attempting to fetch property with ID:", id);
 
-        // First check if we have the property in session storage
-        let sessionProperty = null;
-        try {
-          // Try to get property from session storage
-          const storedProperty = sessionStorage.getItem("currentProperty");
-          const storedPropertyId = sessionStorage.getItem(
-            "lastViewedPropertyId"
-          );
+        // Configure axios defaults for debugging
+        axios.defaults.baseURL = "http://localhost:8000";
+        axios.defaults.withCredentials = true;
 
-          if (storedProperty) {
-            const parsedProperty = JSON.parse(storedProperty);
+        // Log request details
+        console.log(
+          "Making API request to:",
+          `http://localhost:8000/api/properties/${id}`
+        );
 
-            // Verify this is the correct property by checking ID matches
-            if (parsedProperty && String(parsedProperty._id) === String(id)) {
-              console.log("Found matching property in session storage");
-              sessionProperty = parsedProperty;
+        const response = await axios.get(`/api/properties/${id}`, {
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        });
 
-              // We found the property, set it and stop loading
-              setProperty(sessionProperty);
-              setLoading(false);
-              console.log(
-                "Using session storage property data:",
-                sessionProperty
-              );
-              return;
-            } else if (storedPropertyId === String(id)) {
-              // IDs match but property object might be corrupted
-              console.log(
-                "Property ID matches but object is invalid. Fetching from API."
-              );
-            } else {
-              console.log("Stored property doesn't match requested ID");
-            }
-          } else {
-            console.log("No property data in session storage");
-          }
-        } catch (sessionError) {
-          console.error("Error accessing session storage:", sessionError);
-        }
+        console.log("Full API Response:", response);
 
-        // If we didn't find a valid property in session storage, fetch from API
-        console.log("Attempting to fetch property from API");
-        const baseUrl = process.env.REACT_APP_API_URL || "/api";
-        const apiUrl = baseUrl.startsWith("http")
-          ? `${baseUrl}/properties/${id}`
-          : `http://localhost:8000/api/properties/${id}`;
+        if (response.data) {
+          console.log("Successfully fetched property:", response.data);
+          setProperty(response.data);
 
-        try {
-          const response = await axios.get(apiUrl);
-          if (response.data) {
-            console.log(
-              "Successfully fetched property from API:",
-              response.data
+          // Cache in session storage
+          try {
+            sessionStorage.setItem(
+              "currentProperty",
+              JSON.stringify(response.data)
             );
-            setProperty(response.data);
-            setLoading(false);
-            return;
+            sessionStorage.setItem(
+              "lastViewedPropertyId",
+              String(response.data._id)
+            );
+          } catch (storageError) {
+            console.warn("Failed to cache in session storage:", storageError);
           }
-        } catch (mongoError) {
-          console.log("API fetch error:", mongoError.message);
-
-          // If API fetch fails, but we already have session property, use it as fallback
-          if (sessionProperty) {
-            console.log("Using session property as fallback");
-            setProperty(sessionProperty);
-            setLoading(false);
-            return;
-          }
-
-          // If no session property, try dummy data
-          console.log("Looking in dummy data for ID:", id);
-
-          // Try to match ID, accounting for possible type differences
-          let dummyProperty = dummyProperties.find(
-            (p) => String(p._id) === String(id)
-          );
-
-          if (dummyProperty) {
-            console.log("Found matching dummy property:", dummyProperty);
-            setProperty(dummyProperty);
-            setLoading(false);
-            return;
-          }
-
-          // If we still don't have a property, use the first dummy property as a fallback
-          if (dummyProperties.length > 0) {
-            console.log("Using first dummy property as final fallback");
-            setProperty(dummyProperties[0]);
-            setLoading(false);
-            return;
-          }
-
-          // If absolutely no properties available
-          console.error("No property data available from any source");
-          setLoading(false);
-          setError(true);
+        } else {
+          console.error("No data in response");
+          setError("No property data found");
         }
       } catch (err) {
-        console.error("Error in property detail loading:", err);
+        console.error("Detailed fetch error:", {
+          message: err.message,
+          response: err.response,
+          status: err.response?.status,
+          statusText: err.response?.statusText,
+          data: err.response?.data,
+        });
+
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            "Failed to fetch property details"
+        );
+      } finally {
         setLoading(false);
-        setError(true);
       }
     };
 
     if (id) {
       fetchPropertyDetails();
     } else {
-      console.error("No property ID provided in URL");
+      setError("No property ID provided");
       setLoading(false);
-      setError(true);
     }
-
-    // Cleanup function
-    return () => {
-      // When navigating away, preserve the current property data
-      if (property && !error) {
-        try {
-          // Store current property for potential navigation back
-          sessionStorage.setItem("currentProperty", JSON.stringify(property));
-          sessionStorage.setItem("lastViewedPropertyId", String(property._id));
-          console.log("Preserved property data for navigation:", property._id);
-        } catch (err) {
-          console.error("Failed to preserve property data:", err);
-        }
-      }
-    };
   }, [id]);
 
   useEffect(() => {
@@ -234,58 +172,38 @@ const PropertyDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Loading Property Details...
-            </h2>
-            <div className="animate-pulse mt-8">
-              <div className="h-8 bg-gray-200 rounded w-1/4 mb-8 mx-auto"></div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                  <div className="h-96 bg-gray-200 rounded-lg mb-4"></div>
-                  <div className="grid grid-cols-4 gap-4">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className="h-24 bg-gray-200 rounded-lg"
-                      ></div>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                  <div className="h-32 bg-gray-200 rounded"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl font-semibold">Loading property details...</div>
       </div>
     );
   }
 
-  if (error || !property) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Property Not Found
-            </h2>
-            <p className="text-gray-600 mb-6">
-              We couldn't find the property you're looking for.
-            </p>
-            <Link
-              to="/listings"
-              className="text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Return to Listings
-            </Link>
-          </div>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <div className="text-xl font-semibold text-red-600">
+          {typeof error === "string" ? error : "Error loading property"}
         </div>
+        <button
+          onClick={() => navigate("/listings")}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Return to Listings
+        </button>
+      </div>
+    );
+  }
+
+  if (!property) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <div className="text-xl font-semibold">Property not found</div>
+        <button
+          onClick={() => navigate("/listings")}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Return to Listings
+        </button>
       </div>
     );
   }
@@ -730,12 +648,20 @@ const PropertyDetail = () => {
                     </p>
                     <div className="h-[400px] w-full rounded-lg overflow-hidden">
                       <StaticMap
-                        address={isBooked ? property.address : undefined}
-                        city={property.city}
-                        state={property.state}
-                        country={property.country}
-                        isConfirmedBooking={isBooked}
-                        zoom={13}
+                        center={[
+                          property.location.coordinates[1],
+                          property.location.coordinates[0],
+                        ]}
+                        zoom={15}
+                        markers={[
+                          {
+                            position: [
+                              property.location.coordinates[1],
+                              property.location.coordinates[0],
+                            ],
+                            popup: property.title,
+                          },
+                        ]}
                       />
                     </div>
                     {!isBooked && (

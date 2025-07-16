@@ -9,24 +9,51 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Enable CORS with specific options
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Allow your React app's origin
+    credentials: true, // Allow credentials
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection with better error handling
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
+const connectDB = async () => {
+  try {
+    const mongoURI =
+      process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/smart_rent_system";
+    console.log("Attempting to connect to MongoDB at:", mongoURI);
+
+    await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
     console.log("MongoDB Connected Successfully");
-  })
-  .catch((err) => {
+
+    // Test the connection by getting connection state
+    const connectionState = mongoose.connection.readyState;
+    console.log(
+      "Connection State:",
+      connectionState === 0
+        ? "disconnected"
+        : connectionState === 1
+          ? "connected"
+          : connectionState === 2
+            ? "connecting"
+            : connectionState === 3
+              ? "disconnecting"
+              : "unknown"
+    );
+  } catch (err) {
     console.error("MongoDB Connection Error:", err);
-    process.exit(1); // Exit if database connection fails
-  });
+    process.exit(1);
+  }
+};
+
+connectDB();
 
 // Routes
 app.use("/api/properties", require("./routes/propertyRoutes"));

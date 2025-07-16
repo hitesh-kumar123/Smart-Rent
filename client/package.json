@@ -28,6 +28,7 @@
     "eject": "react-scripts eject",
     "seed": "node scripts/seedDatabase.js"
   },
+  "proxy": "http://localhost:8000",
   "eslintConfig": {
     "extends": [
       "react-app",
