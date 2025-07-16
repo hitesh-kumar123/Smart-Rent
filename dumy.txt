@@ -1,3 +1,4 @@
+
 const dummyProperties = [
   // Apartment category (2 properties)
   {
