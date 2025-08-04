@@ -1,0 +1,19 @@
+<svg
+    className="h-12 w-12"
+    viewBox="0 0 100 100"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"         
+    >
+              {/* Location Pin Shape */}
+        <path
+            d="M50 10C35.088 10 23 22.088 23 37C23 52.5 46.5 85 50 90C53.5 85 77 52.5 77 37C77 22.088 64.912 10 50 10Z"
+            fill="#E53E3E"
+            stroke="#E53E3E"
+            strokeWidth="2"
+        />
+
+        {/* House Icon Inside Pin */}
+        <path d="M50 25L40 35V50H45V40H55V50H60V35L50 25Z" fill="white" />
+        <rect x="42" y="42" width="4" height="8" fill="white" />
+        <path d="M38 35L50 23L62 35H60L50 25L40 35H38Z" fill="white" />
+</svg>
