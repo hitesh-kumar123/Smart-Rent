@@ -935,12 +935,12 @@ const Listings = () => {
       {/* Categories */}
       <div className="sticky top-[72px] z-30 bg-white py-4 border-b border-gray-200 transition-all duration-200 ease-in-out">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center">
-            <div className="relative flex-grow overflow-hidden">
+          <div className="flex justify-around items-center">
+            <div className="relative max-w-4xl flex-grow overflow-hidden">
               {/* Left Arrow */}
               <button
                 onClick={() => scrollCategories("left")}
-                className="absolute left-[200px] top-1/2 -translate-y-1/2 bg-white border border-neutral-200 shadow-lg hover:shadow-xl hover:bg-neutral-100 transition-all duration-200 rounded-full w-10 h-10 flex items-center justify-center z-20 active:scale-95"
+                className="absolute top-1/2 -translate-y-1/2 bg-white border border-neutral-200 shadow-lg hover:shadow-xl hover:bg-neutral-100 transition-all duration-200 rounded-full w-10 h-10 flex items-center justify-center z-20 active:scale-95"
                 aria-label="Scroll left"
               >
                 <i className="fas fa-chevron-left text-2xl text-primary-600"></i>
@@ -948,7 +948,7 @@ const Listings = () => {
 
               {/* Scrollable Categories */}
               <div
-                className="flex overflow-x-auto w-[70%] ms-60 pb-2 pl-8 pr-8 scrollbar-hide"
+                className="flex overflow-x-auto pb-2 pl-8 pr-8 scrollbar-hide"
                 ref={categoriesContainerRef}
               >
                 <div className="flex space-x-8">
@@ -998,7 +998,7 @@ const Listings = () => {
               {/* Right Arrow */}
               <button
                 onClick={() => scrollCategories("right")}
-                className="absolute right-[130px] top-1/2 -translate-y-1/2 bg-white border border-neutral-200 shadow-lg hover:shadow-xl hover:bg-neutral-100 transition-all duration-200 rounded-full w-10 h-10 flex items-center justify-center z-20 active:scale-95"
+                className="absolute right-0 top-1/2 -translate-y-1/2 bg-white border border-neutral-200 shadow-lg hover:shadow-xl hover:bg-neutral-100 transition-all duration-200 rounded-full w-10 h-10 flex items-center justify-center z-20 active:scale-95"
                 aria-label="Scroll right"
               >
                 <i className="fas fa-chevron-right text-2xl text-primary-600"></i>
