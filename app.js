@@ -33,6 +33,37 @@ app.use("/api/messages", require("./routes/messageRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
 app.use("/api/bookings", require("./routes/bookingRoutes"));
 
+// Root route handler
+app.get("/", (req, res) => {
+  res.json({
+    message: "Smart Rent System API",
+    status: "running",
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: "/api/health",
+      properties: "/api/properties",
+      users: "/api/users",
+      messages: "/api/messages",
+      reviews: "/api/reviews",
+      bookings: "/api/bookings",
+    },
+  });
+});
+
+// 404 handler for undefined routes
+app.use("*", (req, res) => {
+  res.status(404).json({
+    message: "Route not found",
+    requestedUrl: req.originalUrl,
+    availableEndpoints: {
+      root: "/",
+      health: "/api/health",
+      properties: "/api/properties",
+      users: "/api/users",
+    },
+  });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
