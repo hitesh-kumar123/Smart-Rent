@@ -11,10 +11,7 @@ const User = require('../models/user');
 dotenv.config();
 
 // Connect to database
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('MongoDB Connected'))
 .catch(err => {
   console.error(`Error: ${err.message}`);
