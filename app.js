@@ -33,8 +33,11 @@ app.use("/api/messages", require("./routes/messageRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
 app.use("/api/bookings", require("./routes/bookingRoutes"));
 
-// Root route handler
-app.get("/", (req, res) => {
+// Serve static files from the React build directory
+app.use(express.static(path.join(__dirname, "client/build")));
+
+// Root route handler for API
+app.get("/api", (req, res) => {
   res.json({
     message: "Smart Rent System API",
     status: "running",
@@ -50,18 +53,9 @@ app.get("/", (req, res) => {
   });
 });
 
-// 404 handler for undefined routes
-app.use("*", (req, res) => {
-  res.status(404).json({
-    message: "Route not found",
-    requestedUrl: req.originalUrl,
-    availableEndpoints: {
-      root: "/",
-      health: "/api/health",
-      properties: "/api/properties",
-      users: "/api/users",
-    },
-  });
+// Catch-all handler: send back React's index.html file for any non-API routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client/build", "index.html"));
 });
 
 // Error handling middleware
