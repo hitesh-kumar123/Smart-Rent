@@ -1,10 +1,10 @@
 services:
-  # Backend API Service
+  # Full-Stack Application (Backend + Frontend)
   - type: web
-    name: smart-rent-api
+    name: smart-rent
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -25,14 +25,3 @@ services:
         sync: false
       - key: RESEND_API_KEY
         sync: false
-
-  # Frontend Static Site
-  - type: web
-    name: smart-rent-frontend
-    env: static
-    plan: free
-    buildCommand: cd client && npm install && npm run build
-    staticPublishPath: ./client/build
-    envVars:
-      - key: REACT_APP_API_URL
-        value: https://smart-rent-api.onrender.com
