@@ -6,7 +6,8 @@
   "scripts": {
     "server": "node server.js",
     "build": "cd client && npm install && npm run build",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "concurrently \"node app.js\" \"cd client && npm run dev\""
   },
   "keywords": [],
   "author": "",
@@ -40,7 +41,7 @@
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2",
+    "concurrently": "^9.2.1",
     "nodemon": "^3.1.0"
   }
 }
