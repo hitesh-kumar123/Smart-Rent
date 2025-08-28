@@ -5,9 +5,11 @@
   "main": "server.js",
   "scripts": {
     "server": "node server.js",
-    "build": "cd client && npm install && npm run build",
+    "build": "node build.js",
     "start": "npm run build && node server.js",
-    "dev": "concurrently \"node app.js\" \"cd client && npm run dev\""
+    "dev": "concurrently \"node app.js\" \"cd client && npm run dev\"",
+    "postinstall": "cd client && npm install",
+    "test-build": "node test-build.js"
   },
   "keywords": [],
   "author": "",

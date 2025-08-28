@@ -38,6 +38,30 @@ app.use("/api/bookings", require("./routes/bookingRoutes"));
 const buildPath = path.join(__dirname, "client/build");
 const indexPath = path.join(buildPath, "index.html");
 
+console.log("🔍 Checking build directory...");
+console.log("📁 Build path:", buildPath);
+console.log("📄 Index path:", indexPath);
+console.log("📂 Directory exists:", fs.existsSync(buildPath));
+console.log("📄 File exists:", fs.existsSync(indexPath));
+
+// List contents of client directory for debugging
+const clientPath = path.join(__dirname, "client");
+if (fs.existsSync(clientPath)) {
+  console.log("📂 Client directory contents:");
+  try {
+    const clientContents = fs.readdirSync(clientPath);
+    console.log("   -", clientContents.join(", "));
+
+    if (fs.existsSync(buildPath)) {
+      console.log("📂 Build directory contents:");
+      const buildContents = fs.readdirSync(buildPath);
+      console.log("   -", buildContents.join(", "));
+    }
+  } catch (err) {
+    console.log("   Error reading directory:", err.message);
+  }
+}
+
 // Serve static files from the React build directory (only if it exists)
 if (fs.existsSync(buildPath)) {
   app.use(express.static(buildPath));
