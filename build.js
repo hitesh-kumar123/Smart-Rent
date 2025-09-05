@@ -29,10 +29,10 @@ try {
     throw new Error("index.html was not found in build directory");
   }
 
-  console.log("✅ Build completed successfully!");
-  console.log(`📁 Build directory: ${buildPath}`);
-  console.log(`📄 index.html: ${indexPath}`);
+  console.log(" Build completed successfully!");
+  console.log(` Build directory: ${buildPath}`);
+  console.log(` index.html: ${indexPath}`);
 } catch (error) {
-  console.error("❌ Build failed:", error.message);
+  console.error(" Build failed:", error.message);
   process.exit(1);
 }

@@ -8,8 +8,7 @@
     "build": "node build.js",
     "start": "npm run build && node server.js",
     "dev": "concurrently \"node app.js\" \"cd client && npm run dev\"",
-    "postinstall": "cd client && npm install",
-    "test-build": "node test-build.js"
+    "postinstall": "cd client && npm install"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +30,7 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",
+    "lucide-react": "^0.542.0",
     "method-override": "^3.0.0",
     "mongoose": "^8.13.2",
     "multer": "^1.4.5-lts.2",

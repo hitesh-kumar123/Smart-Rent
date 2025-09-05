@@ -677,31 +677,8 @@ const Navbar = () => {
             </div>
           </div>
         </div>
-
-        {/* Mobile Search - Only visible on mobile - Currently disabled */}
-        {/* <div ref={searchRef} className="mt-4 md:hidden">
-          <form onSubmit={handleSearchSubmit} className="w-full">
-            <div className="relative rounded-full border border-neutral-200 shadow-sm">
-              <input
-                type="text"
-                placeholder={getText("common", "search")}
-                value={searchQuery}
-                onChange={handleSearchChange}
-                onFocus={() => setIsSearchFocused(true)}
-                className="w-full px-4 py-2 rounded-full focus:outline-none text-sm pr-16"
-              />
-              <button
-                type="submit"
-                className="absolute right-3 top-[58%] transform -translate-y-1/2 bg-[#FF4C6D] text-white p-2 rounded-full hover:bg-[#E03F5A] transition duration-200 flex items-center justify-center w-10 h-10 m-1"
-              >
-                <i className="fas fa-search text-sm"></i>
-              </button>
-            </div>
-          </form>
-        </div> */}
       </div>
     </nav>
   );
 };
-
 export default Navbar;

@@ -1520,7 +1520,8 @@ const Listings = () => {
                   return "https://images.unsplash.com/photo-1597736108123-090b5a0b1d3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHZpbmV5YXJkfGVufDB8fDB8fHww&auto=format&fit=crop&w=600&q=60";
                 } else {
                   // Default fallback
-                  return "https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fHJlYWwlMjBlc3RhdGV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=600&q=60";
+                  return "https://img.icons8.com/ios-filled/100/000000/home.png";
+
                 }
               };
 
