@@ -1,32 +1,88 @@
     hitesh@$220
 
 
-    mongodb data and dummy data property issue 
-    --  mongodb and dummy data ye dono ki api call ho rahi hai mere code me bec mene cursor se prompt de kar jo code likha hai usme logic esa build kiya hai ki kus
-    jab mongodb ka data flase hoga to dummy data aayega or es reson se mera mongodb ka load hi nhi hota hai bec
-    jab me backend server run karta hu to use likha aata hai 
-    mongo db connect syssefully but jo data meri website me show ho raha hai vo to dummy data 
     
 
-    <!-- error slove karne ka try kiya  -->
-    ---- mene try kiya dummy data ko remove karne ka or jab remove kiya sida hi mene mongodb ke compass me data ki json file ko import 
-    liya to image show hue but error ane lagi vo eero ye thi ki jis type mera dummy data show hota tha or sari property ki image show hoti thi vo to ho rah tha but 
-    jo mera dummy data me har image par click karne jo detail page open hota tha vo nhi ho raha tha muje pata nhi chal raha tha ki jo data aa raha 
-    mongodb se use kese dummy data ki trah detail page open ho vo set karna hai
 
-    <!-- each property show gallery not dummy -->
-    when i try to each property show own gallery not dummy I slove the error and make json but direct import in mongodb compass
-    then i see a error is my data is not show in website propre bec i face a issue for database design and I want to try not show dummy
-    and repeate image show im my website 
-    bec dummy data file {propertyimage.jsx} this is write a logic for image show 
-    in this code use a same image a multiple time and set a fallbacke image so there is not a good i decide a remove this 
-    dummy and repated and each property to set a original image gallery but 
 
-    problem is which way my dummy data show on my website do not look like a my mongodb data show on website 
 
-    ---------------------------------------------------------------------------------------------------------------------------------
 
-    1) how to fix this confile api
-    2) mongodb ka data usko dummy data ki tarah website me show kese karau 
-    3) show hone ke baad dummy data me jese har property pe click karne par page open hota hao vo kese karna hai 
-    4
+     {/* Reserve Modal */}
+        {/* {showReserveModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl p-6 max-w-md w-full">
+              <h3 className="text-xl font-semibold mb-4">Reserve Property</h3>
+              <form onSubmit={handleReserve} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Check-in
+                    </label>
+                    <input
+                      type="date"
+                      value={reservation.checkIn}
+                      onChange={(e) =>
+                        setReservation({
+                          ...reservation,
+                          checkIn: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Check-out
+                    </label>
+                    <input
+                      type="date"
+                      value={reservation.checkOut}
+                      onChange={(e) =>
+                        setReservation({
+                          ...reservation,
+                          checkOut: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    Number of Guests
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={reservation.guests}
+                    onChange={(e) =>
+                      setReservation({
+                        ...reservation,
+                        guests: parseInt(e.target.value),
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    required
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700"
+                  >
+                    Reserve Now
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowReserveModal(false)}
+                    className="flex-1 py-2 text-neutral-600 hover:text-neutral-800"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )} */}

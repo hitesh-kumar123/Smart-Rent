@@ -102,7 +102,8 @@ const getProperties = async (req, res) => {
       .populate("owner", "username firstName lastName profileImage")
       .sort({ createdAt: -1 })
       .skip(startIndex)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     console.log(`Properties fetched: ${properties.length}`);
 

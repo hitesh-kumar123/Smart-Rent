@@ -32,8 +32,8 @@ const PropertyImage = ({
           typeof img === "string" && img.trim() !== ""
             ? img
             : img?.url?.trim() !== ""
-            ? img.url
-            : null
+              ? img.url
+              : null
         )
         .filter(Boolean);
 

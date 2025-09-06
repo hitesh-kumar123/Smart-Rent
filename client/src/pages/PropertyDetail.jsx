@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import PropertyImage from "../components/PropertyImage";
 import StaticMap from "../components/StaticMap";
-import { dummyProperties } from "../data/dummyProperties";
+// import { dummyProperties } from "../data/dummyProperties";
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -27,7 +27,10 @@ const PropertyDetail = () => {
     guests: 1,
   });
   const [isBooked, setIsBooked] = useState(false);
-
+  console.log(
+    property,
+    "-----------------------------------------------------------"
+  );
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       try {
@@ -76,15 +79,10 @@ const PropertyDetail = () => {
           console.error("Error accessing session storage:", sessionError);
         }
 
-        // If we didn't find a valid property in session storage, fetch from API
-        console.log("Attempting to fetch property from API");
-        const baseUrl = process.env.REACT_APP_API_URL || "/api";
-        const apiUrl = baseUrl.startsWith("http")
-          ? `${baseUrl}/properties/${id}`
-          : `http://localhost:8000/api/properties/${id}`;
-
         try {
-          const response = await axios.get(apiUrl);
+          const response = await axios.get(
+            `http://localhost:8000/api/properties/${id}`
+          );
           if (response.data) {
             console.log(
               "Successfully fetched property from API:",
@@ -99,7 +97,6 @@ const PropertyDetail = () => {
 
           // If API fetch fails, but we already have session property, use it as fallback
           if (sessionProperty) {
-            console.log("Using session property as fallback");
             setProperty(sessionProperty);
             setLoading(false);
             return;
@@ -109,24 +106,24 @@ const PropertyDetail = () => {
           console.log("Looking in dummy data for ID:", id);
 
           // Try to match ID, accounting for possible type differences
-          let dummyProperty = dummyProperties.find(
-            (p) => String(p._id) === String(id)
-          );
+          // let dummyProperty = dummyProperties.find(
+          //   (p) => String(p._id) === String(id)
+          // );
 
-          if (dummyProperty) {
-            console.log("Found matching dummy property:", dummyProperty);
-            setProperty(dummyProperty);
-            setLoading(false);
-            return;
-          }
+          // if (dummyProperty) {
+          //   console.log("Found matching dummy property:", dummyProperty);
+          //   setProperty(dummyProperty);
+          //   setLoading(false);
+          //   return;
+          // }
 
           // If we still don't have a property, use the first dummy property as a fallback
-          if (dummyProperties.length > 0) {
-            console.log("Using first dummy property as final fallback");
-            setProperty(dummyProperties[0]);
-            setLoading(false);
-            return;
-          }
+          // if (dummyProperties.length > 0) {
+          //   console.log("Using first dummy property as final fallback");
+          //   setProperty(dummyProperties[0]);
+          //   setLoading(false);
+          //   return;
+          // }
 
           // If absolutely no properties available
           console.error("No property data available from any source");
@@ -355,7 +352,7 @@ const PropertyDetail = () => {
         <div className="mb-8 bg-white rounded-xl overflow-hidden shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-2">
             <div className="md:col-span-1 h-96 rounded-tl-xl rounded-bl-xl overflow-hidden">
-              {property.images && property.images.length > 0 ? (
+              {property.images ? (
                 <PropertyImage
                   images={property.images}
                   alt={property.title}
@@ -379,7 +376,9 @@ const PropertyDetail = () => {
                         index === 0 ? "rounded-tr-xl" : ""
                       } ${index === 3 ? "rounded-br-xl" : ""}`}
                     >
+                      {/* Pass the specific image URL via `image` so PropertyImage displays the correct thumbnail */}
                       <PropertyImage
+                        image={image}
                         images={property.images}
                         alt={`${property.title} - ${index + 2}`}
                         className="w-full h-full object-cover"
@@ -409,14 +408,14 @@ const PropertyDetail = () => {
                         item.id === 1 ? "rounded-tr-xl" : ""
                       } ${item.id === 4 ? "rounded-br-xl" : ""}`}
                     >
-                      <PropertyImage
+                      {/* <PropertyImage
                         image={`https://source.unsplash.com/random/300x200?${item.category}`}
                         alt={`Additional view ${item.id}`}
                         className="w-full h-full object-cover"
                         showGallery={true}
                         id={`property-image-placeholder-${item.id}`}
                         propertyId={property._id}
-                      />
+                      /> */}
                     </div>
                   ))}
             </div>
@@ -1028,84 +1027,6 @@ const PropertyDetail = () => {
         )}
 
         {/* Reserve Modal */}
-        {/* {showReserveModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl p-6 max-w-md w-full">
-              <h3 className="text-xl font-semibold mb-4">Reserve Property</h3>
-              <form onSubmit={handleReserve} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
-                      Check-in
-                    </label>
-                    <input
-                      type="date"
-                      value={reservation.checkIn}
-                      onChange={(e) =>
-                        setReservation({
-                          ...reservation,
-                          checkIn: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
-                      Check-out
-                    </label>
-                    <input
-                      type="date"
-                      value={reservation.checkOut}
-                      onChange={(e) =>
-                        setReservation({
-                          ...reservation,
-                          checkOut: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
-                    Number of Guests
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={reservation.guests}
-                    onChange={(e) =>
-                      setReservation({
-                        ...reservation,
-                        guests: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    required
-                  />
-                </div>
-                <div className="flex gap-4">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700"
-                  >
-                    Reserve Now
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowReserveModal(false)}
-                    className="flex-1 py-2 text-neutral-600 hover:text-neutral-800"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )} */}
       </div>
     </div>
   );
