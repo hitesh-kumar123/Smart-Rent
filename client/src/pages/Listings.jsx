@@ -1536,7 +1536,10 @@ const Listings = () => {
 
                         {/* Image counter badge */}
                         {propertyImages.length > 1 && (
-                          <div className="absolute bottom-3 right-3 bg-black bg-opacity-60 text-white px-2 py-1 rounded-md text-xs z-10">
+                          <div
+                            className="absolute bottom-3 right-3 bg-black bg-opacity-60 text-white px-2 py-1 rounded-md text-xs"
+                            style={{ zIndex: 8 }}
+                          >
                             <i className="fas fa-images mr-1"></i>
                             {propertyImages.length} photos
                           </div>
