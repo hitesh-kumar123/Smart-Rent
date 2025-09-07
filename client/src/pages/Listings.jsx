@@ -944,7 +944,10 @@ const Listings = () => {
   return (
     <div className="bg-neutral-50 min-h-screen mt-2">
       {/* Categories */}
-      <div className="sticky top-[72px] z-30 bg-white py-4 border-b border-gray-200 transition-all duration-200 ease-in-out">
+      <div
+        className="sticky top-[72px] bg-white py-4 border-b border-gray-200 transition-all duration-200 ease-in-out"
+        style={{ zIndex: 10 }}
+      >
         <div className="container mx-auto px-4">
           <div className="flex justify-around items-center">
             <div className="relative max-w-4xl flex-grow overflow-hidden">
@@ -1507,7 +1510,10 @@ const Listings = () => {
                   <div>
                     {/* Property image section with price tag */}
                     <div className="relative h-60 overflow-hidden">
-                      <span className="absolute top-3 right-3 bg-white text-primary-600 font-semibold px-3 py-1 rounded-full text-sm shadow-sm z-10">
+                      <span
+                        className="absolute top-3 right-3 bg-white text-primary-600 font-semibold px-3 py-1 rounded-full text-sm shadow-sm"
+                        style={{ zIndex: 8 }}
+                      >
                         {formatPrice(property.price || 0)}/night
                       </span>
 

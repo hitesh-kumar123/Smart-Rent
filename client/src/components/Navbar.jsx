@@ -548,7 +548,10 @@ const Navbar = () => {
 
               {/* User dropdown menu */}
               {isProfileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-card border border-neutral-200 divide-y divide-neutral-100 py-1 z-30">
+                <div
+                  className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-card border border-neutral-200 divide-neutral-100 py-1 z-[1000]"
+                  style={{ zIndex: 1000 }}
+                >
                   {!isAuthenticated ? (
                     // Not logged in menu options
                     <div className="py-1">
