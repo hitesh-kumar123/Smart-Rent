@@ -26,9 +26,6 @@ const dummyProperties = [
       workspace: true,
     },
     images: [
-      "https://unsplash.com/photos/white-concrete-building-during-daytime-gxyeia7Syuk",
-      "https://unsplash.com/photos/white-concrete-building-during-daytime-gxyeia7Syuk",
-      "https://unsplash.com/photos/white-concrete-building-during-daytime-gxyeia7Syuk",
       "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YXBhcnRtZW50fGVufDB8fDB8fHww&auto=format&fit=crop&w=600&q=60",
     ],
   },
