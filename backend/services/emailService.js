@@ -1,7 +1,20 @@
 const { Resend } = require("resend");
 
-// Initialize Resend with API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend with API key if available, otherwise create a no-op client
+let resend = null;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+} else {
+  console.warn("RESEND_API_KEY not set. Email sending will be skipped.");
+  resend = {
+    emails: {
+      send: async () => {
+        console.warn("Skipping email send because RESEND_API_KEY is missing.");
+        return { data: { skipped: true }, error: null };
+      },
+    },
+  };
+}
 
 const sendPasswordResetEmail = async (email, resetToken) => {
   try {

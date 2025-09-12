@@ -14,7 +14,7 @@ if (isLocalDev) {
 } else {
   // In production, use the full URL to the backend
   console.log("Running in production mode - using remote backend");
-  axios.defaults.baseURL = "https://srm-backend.onrender.com";
+  axios.defaults.baseURL = process.env.REACT_APP_API_URL || "";
 }
 
 // Set axios to include credentials in requests
