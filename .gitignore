@@ -4,12 +4,22 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 
-# Environment variables
+# Environment variables and secrets
 .env
+.env.*
 .env.local
+.env.development
 .env.development.local
+.env.test
 .env.test.local
+.env.production
 .env.production.local
+*.pem
+*.key
+*.cert
+config.json
+credentials.json
+secrets.json
 
 # Build files
 /build
@@ -48,5 +58,51 @@ Thumbs.db
 /public/uploads/
 
 # temporary files
+*.tmp
+*.temp
+.cache/
+
+# Database files
+*.sql
+*.sqlite
+*.sqlite3
+dump.rdb
+
+# Sensitive information
+**/config/secrets.*
+**/credentials.*
+**/private.*
+ssh_key*
+*.p12
+*.pfx
+*.jks
+
+# AWS
+.aws/
+aws.json
+.elasticbeanstalk/
+
+# Logs and debugging
+debug.log
+*.debug
+.debug/
+logs/
+*.log.*
+
+# Local development
+.local/
+local.*
+*.local.*
+
+# Cloud service provider files
+.vercel
+.netlify
+.firebase/
+firebase-debug.log
+serviceAccount.json
+
+# Package files
+package-lock.json
+yarn.lock
 .tmp
 .temp

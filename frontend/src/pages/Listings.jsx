@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import PropertyImage from "../components/PropertyImage";
 import { useAppSettings } from "../contexts/AppSettingsContext";
+import api from "../config/api";
 
 const Listings = () => {
   // State for property data and loading indicators
@@ -183,9 +183,8 @@ const Listings = () => {
         }
 
         // Make API call to fetch properties
-        const API_BASE = process.env.REACT_APP_API_URL || "";
-        const response = await axios.get(
-          `http://localhost:8000/api/properties${queryString ? `?${queryString}` : ""}`
+        const response = await api.get(
+          `/api/properties${queryString ? `?${queryString}` : ""}`
         );
 
         // API returns an object: { properties: [...], pagination: {...} }
@@ -193,8 +192,8 @@ const Listings = () => {
           const propsArray = Array.isArray(response.data)
             ? response.data
             : Array.isArray(response.data.properties)
-              ? response.data.properties
-              : null;
+            ? response.data.properties
+            : null;
 
           if (propsArray) {
             setProperties(propsArray);
@@ -1497,8 +1496,8 @@ const Listings = () => {
               const propertyImages = hasValidImages
                 ? property.images
                 : hasValidImage
-                  ? [property.image]
-                  : [getCategoryImage()];
+                ? [property.image]
+                : [getCategoryImage()];
 
               return (
                 // Property card component
@@ -1642,10 +1641,4 @@ const Listings = () => {
     </div>
   );
 };
-
-/**
- * Dummy property data for fallback when API is unavailable
- * This data is used when the API call fails or returns invalid data
- */
-
 export default Listings;

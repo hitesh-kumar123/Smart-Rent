@@ -234,7 +234,7 @@ const dummyProperties = [
       workspace: true,
     },
     images: [
-      "https://images.unsplash.com/photo-1551361415-69c87624161d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Y29uZG98ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=600&q=60",
+      "https://t4.ftcdn.net/jpg/13/17/68/83/240_F_1317688346_Urhpx2q9TTUzjcvI9tQMyAsikSclGjAF.jpg",
     ],
   },
 

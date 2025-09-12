@@ -11,14 +11,17 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:3000",
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
   credentials: true,
   optionsSuccessStatus: 204,
 };
 
 // Middleware
 app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -41,8 +44,8 @@ app.use("/api/messages", require("./routes/messageRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
 app.use("/api/bookings", require("./routes/bookingRoutes"));
 
-// Check if build directory exists
-const buildPath = path.join(__dirname, "client/build");
+// Check if build directory exists (serve from top-level frontend/build)
+const buildPath = path.join(__dirname, "../frontend/build");
 const indexPath = path.join(buildPath, "index.html");
 
 console.log("🔍 Checking build directory...");
