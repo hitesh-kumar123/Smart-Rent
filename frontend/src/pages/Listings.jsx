@@ -233,10 +233,7 @@ const Listings = () => {
 
     fetchProperties();
   }, [location.search, language]);
-  console.log(
-    properties,
-    "----------------------------------------------------------------------------------------"
-  );
+  console.log(properties);
   /**
    * Handles changes to the filter inputs
    * @param {Event} e - The change event
