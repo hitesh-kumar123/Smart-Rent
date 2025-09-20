@@ -48,7 +48,7 @@ const PropertyMap = () => {
         const baseUrl = process.env.REACT_APP_API_URL || "/api";
         const apiUrl = baseUrl.startsWith("http")
           ? `${baseUrl}/properties/${id}`
-          : `http://localhost:8000/api/properties/${id}`;
+          : `${process.env.REACT_APP_API_URL}/api/properties/${id}`;
 
         const response = await axios.get(apiUrl);
         if (response.data) {

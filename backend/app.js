@@ -20,7 +20,7 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 204,
 };
-
+console.log(process.env.REACT_APP_API_URL);
 // Middleware
 app.use(cors(corsOptions));
 
