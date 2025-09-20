@@ -12,7 +12,6 @@ import logoSvg from "../logo.svg";
  */
 const Navbar = () => {
   // State for UI controls
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -23,7 +22,6 @@ const Navbar = () => {
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
   const searchRef = useRef(null);
   const settingsRef = useRef(null);
-  const { pathname } = useLocation();
   const location = useLocation();
   const navigate = useNavigate();
 

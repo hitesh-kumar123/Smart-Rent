@@ -143,7 +143,8 @@ export const AppSettingsProvider = ({ children }) => {
       INR: "₹",
     };
 
-    const symbol = currencySymbols[currency] || "$";
+    // Get currency symbol for formatting
+    const currencySymbol = currencySymbols[currency] || "$";
 
     // Use real exchange rates if available, otherwise use default conversion
     let convertedAmount = amount;

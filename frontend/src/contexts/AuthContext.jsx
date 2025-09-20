@@ -247,7 +247,7 @@ export function AuthProvider({ children }) {
   const updatePassword = async (passwordData) => {
     try {
       setError("");
-      const res = await axios.put("/api/users/password", passwordData, {
+      await axios.put("/api/users/password", passwordData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -266,7 +266,7 @@ export function AuthProvider({ children }) {
   const resetPassword = async (email) => {
     try {
       setError("");
-      const res = await axios.post("/api/users/forgot-password", { email });
+      await axios.post("/api/users/forgot-password", { email });
       return { success: true, message: "Password reset email sent" };
     } catch (err) {
       const errorMessage =
