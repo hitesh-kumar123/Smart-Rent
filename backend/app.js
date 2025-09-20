@@ -26,6 +26,15 @@ app.use(cors(corsOptions));
 
 // Handle preflight requests
 app.options("*", cors(corsOptions));
+
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(
+    `${new Date().toISOString()} - ${req.method} ${req.url} from ${req.get("Origin") || "unknown"}`
+  );
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -39,6 +48,19 @@ mongoose
     console.error("MongoDB Connection Error:", err);
     process.exit(1); // Exit if database connection fails
   });
+
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+    cors: {
+      allowedOrigins: corsOptions.origin,
+      credentials: corsOptions.credentials,
+    },
+  });
+});
 
 // Routes
 app.use("/api/properties", require("./routes/propertyRoutes"));

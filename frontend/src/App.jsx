@@ -10,6 +10,7 @@ import Messages from "./pages/Messages";
 import Trips from "./pages/Trips";
 import PaymentPage from "./pages/PaymentPage";
 import ResetPassword from "./pages/ResetPassword";
+import ApiTest from "./pages/ApiTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/api-test" element={<ApiTest />} />
 
         {/* Protected routes - require user authentication */}
         <Route
