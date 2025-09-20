@@ -2,7 +2,7 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-console.log("🚀 Starting build process...");
+console.log("Starting build process...");
 
 try {
   // Check if client directory exists
@@ -11,10 +11,10 @@ try {
     throw new Error("Client directory not found");
   }
 
-  console.log("📦 Installing client dependencies...");
+  console.log(" Installing client dependencies...");
   execSync("npm install", { cwd: clientPath, stdio: "inherit" });
 
-  console.log("🔨 Building React app...");
+  console.log("Building React app...");
   execSync("npm run build", { cwd: clientPath, stdio: "inherit" });
 
   // Verify build was successful
