@@ -14,5 +14,10 @@ module.exports = {
   },
   rules: {
     "react/react-in-jsx-scope": "off",
+    "no-unused-vars": "warn",
+    "jsx-a11y/img-redundant-alt": "warn",
+    "jsx-a11y/anchor-is-valid": "warn",
+    "react-hooks/exhaustive-deps": "warn",
+    "import/no-anonymous-default-export": "warn",
   },
 };
