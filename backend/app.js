@@ -12,7 +12,6 @@ const app = express();
 
 const corsOptions = {
   origin: [
-    process.env.REACT_APP_API_URL,
     "https://smartrentsystem.netlify.app",
     "http://127.0.0.1:3000",
     "http://localhost:3000",
@@ -21,7 +20,7 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 204,
 };
-console.log(process.env.REACT_APP_API_URL);
+
 // Middleware
 app.use(cors(corsOptions));
 
