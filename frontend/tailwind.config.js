@@ -10,7 +10,7 @@ module.exports = {
           200: "#ffa8a8",
           300: "#ff7e7e",
           400: "#ff5a5a",
-          500: "#ff385c", // Airbnb primary red
+          500: "#ff385c", // smart rent system primary red
           600: "#e62e50",
           700: "#cc2048",
           800: "#b31638",

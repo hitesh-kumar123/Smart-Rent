@@ -9,3 +9,4 @@
 
 [build.environment]
   REACT_APP_API_URL = "https://smart-rent-g3vd.onrender.com"
+  CI = "false"
