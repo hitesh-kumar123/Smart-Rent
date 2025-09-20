@@ -93,3 +93,6 @@
             </div>
           </div>
         )} */}
+
+<!-- backend render api url  -->
+        https://smart-rent-g3vd.onrender.com
