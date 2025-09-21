@@ -23,7 +23,8 @@ const sendPasswordResetEmail = async (email, resetToken) => {
       `Using Resend API key: ${process.env.RESEND_API_KEY ? "Key exists" : "Key missing"}`
     );
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    // const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const resetUrl = `${process.env.REACT_APP_API_URL}/reset-password/${resetToken}`;
     console.log(`Reset URL: ${resetUrl}`);
 
     // Use onresend.com domain which is already verified with Resend
