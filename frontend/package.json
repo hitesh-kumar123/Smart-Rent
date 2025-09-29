@@ -30,11 +30,12 @@
     "eject": "react-scripts eject",
     "dev": "react-scripts start"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "devDependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "favicons": "^7.2.0",
+    "tailwindcss": "^3.4.1"
   },
   "browserslist": {
     "production": [
@@ -47,13 +48,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "proxy": "http://localhost:8000",
-  "devDependencies": {
-    "@tailwindcss/aspect-ratio": "^0.4.2",
-    "@tailwindcss/forms": "^0.5.7",
-    "@tailwindcss/typography": "^0.5.10",
-    "favicons": "^7.2.0",
-    "tailwindcss": "^3.4.1"
   }
 }

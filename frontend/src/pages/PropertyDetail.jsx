@@ -81,7 +81,7 @@ const PropertyDetail = () => {
 
         try {
           const response = await axios.get(
-            `http://localhost:8000/api/properties/${id}`
+            `${process.env.REACT_APP_API_URL}/api/properties/${id}`
           );
           if (response.data) {
             console.log(
@@ -724,7 +724,9 @@ const PropertyDetail = () => {
                     </h3>
                     <p className="text-neutral-700 mb-4">
                       {property.city
-                        ? `${property.city}, ${property.state || ""}, ${property.country || ""}`
+                        ? `${property.city}, ${property.state || ""}, ${
+                            property.country || ""
+                          }`
                         : "Location details not available"}
                     </p>
                     <div className="h-[400px] w-full rounded-lg overflow-hidden">

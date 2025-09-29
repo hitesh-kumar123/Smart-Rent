@@ -122,9 +122,10 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 // Method to generate JWT token
 userSchema.methods.generateToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+    expiresIn: process.env.JWT_EXPIRE || "30d",  // default fallback
   });
 };
+
 
 // Method to generate password reset token
 userSchema.methods.createPasswordResetToken = function () {

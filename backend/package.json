@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Smart Rent System - A MERN Stack Application",
   "main": "server.js",
-  "scripts": {
+   "scripts": {
     "server": "node server.js",
     "start": "node server.js",
     "dev": "concurrently \"node app.js\" \"cd client && npm run dev\""
