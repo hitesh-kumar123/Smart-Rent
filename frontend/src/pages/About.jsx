@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import useScrollTop from "../hooks/useScrollTop";
 
 const About = () => {
   // Use the scroll top hook
   useScrollTop();
+
+  // State for image loading
+  const [loadedImages, setLoadedImages] = useState({});
+
+  // Handle image load
+  const handleImageLoad = (memberName) => {
+    setLoadedImages((prev) => ({ ...prev, [memberName]: true }));
+  };
 
   // Team members data
   const teamMembers = [
@@ -37,26 +45,37 @@ const About = () => {
   return (
     <div className="bg-neutral-50 min-h-screen">
       {/* Hero Section */}
-      <div className="bg-primary-700 text-white py-20">
+      <section
+        className="bg-primary-700 text-white py-20"
+        aria-labelledby="hero-title"
+      >
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1
+              id="hero-title"
+              className="text-4xl md:text-5xl font-bold mb-6 animate-fadeIn"
+            >
               About Smart Rent System
             </h1>
-            <p className="text-xl text-primary-100 mb-8">
+            <p className="text-xl text-primary-100 mb-8 animate-fadeIn animation-delay-200">
               Making property rentals simple, secure, and enjoyable for
               everyone.
             </p>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Our Story */}
-      <div className="py-16">
+      <section className="py-16" aria-labelledby="story-title">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-10">Our Story</h2>
-            <div className="bg-white rounded-xl shadow-sm p-8 mb-10">
+            <h2
+              id="story-title"
+              className="text-3xl font-bold text-center mb-10 animate-fadeIn animation-delay-400"
+            >
+              Our Story
+            </h2>
+            <div className="bg-white rounded-xl shadow-sm p-8 mb-10 animate-fadeIn animation-delay-600">
               <p className="text-neutral-700 mb-4">
                 Smart Rent System was founded in 2020 with a simple mission: to
                 make property rentals accessible, secure, and enjoyable for
@@ -78,7 +97,7 @@ const About = () => {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Our Values */}
       <div className="bg-white py-16">
@@ -168,13 +187,40 @@ const About = () => {
             {teamMembers.map((member, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl shadow-sm overflow-hidden"
+                className="bg-white rounded-xl shadow-sm overflow-hidden transform transition-all duration-300 hover:shadow-md hover:-translate-y-1"
               >
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="w-full h-48 object-cover object-center"
-                />
+                <div className="relative w-full h-48">
+                  {!loadedImages[member.name] && (
+                    <div className="absolute inset-0 bg-neutral-100 animate-pulse flex items-center justify-center">
+                      <svg
+                        className="w-12 h-12 text-neutral-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                  <img
+                    src={member.image}
+                    alt={`${member.name}, ${member.role}`}
+                    className={`w-full h-full object-cover object-center transition-opacity duration-300 ${
+                      loadedImages[member.name] ? "opacity-100" : "opacity-0"
+                    }`}
+                    onLoad={() => handleImageLoad(member.name)}
+                    onError={(e) => {
+                      e.target.src =
+                        "https://via.placeholder.com/400x300?text=Photo+Unavailable";
+                      handleImageLoad(member.name);
+                    }}
+                  />
+                </div>
                 <div className="p-6">
                   <h3 className="text-xl font-semibold mb-1">{member.name}</h3>
                   <p className="text-primary-600 font-medium mb-4">
@@ -189,29 +235,36 @@ const About = () => {
       </div>
 
       {/* Call to Action */}
-      <div className="bg-primary-700 text-white py-16">
+      <section
+        className="bg-primary-700 text-white py-16"
+        aria-labelledby="cta-title"
+      >
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Join Our Community</h2>
-          <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
+          <h2 id="cta-title" className="text-3xl font-bold mb-6 animate-fadeIn">
+            Join Our Community
+          </h2>
+          <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto animate-fadeIn animation-delay-200">
             Whether you're looking for a place to stay or want to share your
             property with travelers, Smart Rent System is here to help.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link
               to="/listings"
-              className="bg-white text-primary-700 hover:bg-neutral-100 px-8 py-3 rounded-full font-semibold transition duration-300"
+              className="bg-white text-primary-700 hover:bg-neutral-100 px-8 py-3 rounded-full font-semibold transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-700"
+              aria-label="Browse our property listings"
             >
               Explore Properties
             </Link>
             <Link
               to="/host/become-a-host"
-              className="bg-primary-600 hover:bg-primary-500 text-white px-8 py-3 rounded-full font-semibold transition duration-300"
+              className="bg-primary-600 hover:bg-primary-500 text-white px-8 py-3 rounded-full font-semibold transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-700"
+              aria-label="Learn about becoming a property host"
             >
               Become a Host
             </Link>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
