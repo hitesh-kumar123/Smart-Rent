@@ -6,17 +6,9 @@ import NavLogo from "./navbar/NavLogo";
 import NavSearch from "./navbar/NavSearch";
 import NavProfile from "./navbar/NavProfile";
 import NavSettings from "./navbar/NavSettings";
-import NavMobileMenu from "./navbar/NavMobileMenu";
 
-/**
- * Navbar Component
- *
- * Main navigation bar with responsive design for desktop
- * Features: Logo, search, user profile menu, language/currency settings
- */
 const Navbar = () => {
   // State for UI controls
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -25,8 +17,11 @@ const Navbar = () => {
     return saved ? JSON.parse(saved) : [];
   });
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
+  const [isSettingsLoading, setIsSettingsLoading] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const searchRef = useRef(null);
   const settingsRef = useRef(null);
+  const menuRef = useRef(null);
   const { pathname } = useLocation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -73,7 +68,7 @@ const Navbar = () => {
     setIsSettingsMenuOpen(false);
   }, [location.pathname]);
 
-  // Handle clicks outside dropdown menus to close them
+  // Handle clicks outside dropdown menus and keyboard navigation
   useEffect(() => {
     // Handle clicks outside the search dropdown
     const handleClickOutside = (event) => {
@@ -85,11 +80,48 @@ const Navbar = () => {
       }
     };
 
+    // Handle keyboard navigation
+    const handleKeyDown = (event) => {
+      // Close menus on Escape
+      if (event.key === "Escape") {
+        setIsSearchFocused(false);
+        setIsSettingsMenuOpen(false);
+        setIsProfileMenuOpen(false);
+      }
+
+      // Handle Tab key to manage focus trap in menus
+      if (event.key === "Tab" && (isSettingsMenuOpen || isProfileMenuOpen)) {
+        const menu = isSettingsMenuOpen ? settingsRef.current : document;
+        const focusableElements = menu.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstFocusableElement = focusableElements[0];
+        const lastFocusableElement =
+          focusableElements[focusableElements.length - 1];
+
+        if (event.shiftKey) {
+          // If shift + tab and first element is focused, move to last
+          if (document.activeElement === firstFocusableElement) {
+            event.preventDefault();
+            lastFocusableElement.focus();
+          }
+        } else {
+          // If tab and last element is focused, move to first
+          if (document.activeElement === lastFocusableElement) {
+            event.preventDefault();
+            firstFocusableElement.focus();
+          }
+        }
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [isSettingsMenuOpen, isProfileMenuOpen]);
 
   // Control body scrolling when settings modal is open
   useEffect(() => {
@@ -153,15 +185,25 @@ const Navbar = () => {
   };
 
   // Handler for changing language
-  const handleLanguageChange = (langCode, langName) => {
-    changeLanguage(langCode, langName);
-    setIsSettingsMenuOpen(false);
+  const handleLanguageChange = async (langCode, langName) => {
+    try {
+      setIsSettingsLoading(true);
+      await changeLanguage(langCode, langName);
+    } finally {
+      setIsSettingsLoading(false);
+      setIsSettingsMenuOpen(false);
+    }
   };
 
   // Handler for changing currency
-  const handleCurrencyChange = (currencyCode) => {
-    changeCurrency(currencyCode);
-    setIsSettingsMenuOpen(false);
+  const handleCurrencyChange = async (currencyCode) => {
+    try {
+      setIsSettingsLoading(true);
+      await changeCurrency(currencyCode);
+    } finally {
+      setIsSettingsLoading(false);
+      setIsSettingsMenuOpen(false);
+    }
   };
 
   // Handler for user logout action
@@ -176,19 +218,6 @@ const Navbar = () => {
       <div className="container mx-auto">
         {/* Main navigation bar with logo and menu items */}
         <div className="flex justify-between items-center">
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 rounded-lg hover:bg-neutral-100 transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle mobile menu"
-          >
-            <i
-              className={`fas ${
-                isMenuOpen ? "fa-times" : "fa-bars"
-              } text-neutral-700`}
-            ></i>
-          </button>
-
           {/* Logo */}
           <NavLogo />
 
@@ -210,7 +239,7 @@ const Navbar = () => {
           {location.pathname === "/" && (
             <div
               ref={searchRef}
-              className="hidden md:flex relative mx-auto max-w-md w-full rounded-full border border-neutral-200 shadow-search hover:shadow-md transition duration-200"
+              className="flex relative mx-auto max-w-md w-full rounded-full border border-neutral-200 shadow-search hover:shadow-md transition duration-200"
             >
               <form onSubmit={handleSearchSubmit} className="w-full">
                 <input
@@ -290,12 +319,12 @@ const Navbar = () => {
             </div>
           )}
 
-          {/* Navigation - Desktop */}
-          <div className="hidden md:flex items-center space-x-2">
+          {/* Navigation - Responsive */}
+          <div className="flex items-center space-x-2">
             {/* Become a host link */}
             <Link
               to="/host/become-a-host"
-              className="text-neutral-700 hover:text-neutral-900 px-4 py-2 rounded-full text-sm font-medium"
+              className="text-neutral-700 hover:text-neutral-900 px-4 py-2 rounded-full text-sm font-medium hidden sm:block"
             >
               {getText("common", "becomeHost")}
             </Link>
@@ -303,63 +332,101 @@ const Navbar = () => {
             {/* Language and Currency Selector */}
             <div ref={settingsRef} className="relative">
               <button
-                onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
-                className="flex items-center justify-center p-2 text-neutral-700 hover:text-neutral-900 transition duration-200"
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setMenuPosition({ x: rect.left, y: rect.bottom });
+                  setIsSettingsMenuOpen(!isSettingsMenuOpen);
+                }}
+                className="flex items-center justify-center p-2 text-neutral-700 hover:text-neutral-900 transition duration-200 relative"
                 aria-label="Language and Currency Settings"
+                aria-expanded={isSettingsMenuOpen}
+                aria-haspopup="dialog"
               >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                    stroke="black"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M2 12H22"
-                    stroke="black"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z"
-                    stroke="black"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <div className="relative">
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M2 12H22"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span className="sr-only">
+                    Current language: {languageName}, Currency: {currency}
+                  </span>
+                </div>
+                {isSettingsLoading && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3">
+                    <div className="absolute w-full h-full rounded-full border-2 border-t-transparent border-primary-500 animate-spin"></div>
+                  </div>
+                )}
               </button>
 
               {/* Language and Currency Modal */}
               {isSettingsMenuOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center animate-fadeIn">
+                <div
+                  className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center animate-fadeIn"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="settings-modal-title"
+                >
                   <div
-                    className="bg-white rounded-xl shadow-xl max-w-xl w-full max-h-[90vh] overflow-y-auto mx-4 transform transition-all duration-300 ease-out"
-                    style={{ animation: "fadeInUp 0.3s ease-out" }}
+                    ref={menuRef}
+                    className="bg-white rounded-xl shadow-xl w-full max-h-[90vh] overflow-y-auto mx-4 transform transition-all duration-300 ease-out
+                      sm:max-w-xl sm:w-full"
+                    style={{
+                      animation: "fadeInUp 0.3s ease-out",
+                      maxWidth: "min(90vw, 32rem)",
+                      marginTop: Math.min(
+                        menuPosition.y + 20,
+                        window.innerHeight - 600
+                      ),
+                    }}
                   >
                     {/* Header with close button */}
                     <div className="flex justify-between items-center p-4 border-b border-neutral-200 sticky top-0 bg-white z-10">
-                      <h2 className="text-xl font-bold text-neutral-800">
+                      <h2
+                        id="settings-modal-title"
+                        className="text-xl font-bold text-neutral-800"
+                      >
                         Language and Currency
                       </h2>
                       <div className="flex items-center">
-                        <span className="text-sm text-neutral-500 mr-3">
+                        <span
+                          className="text-sm text-neutral-500 mr-3"
+                          role="status"
+                          aria-live="polite"
+                        >
                           Currently: {languageName}, {currency}
                         </span>
                         <button
                           onClick={() => setIsSettingsMenuOpen(false)}
                           className="text-neutral-500 hover:text-neutral-700 p-2 rounded-full hover:bg-neutral-100 transition duration-200"
-                          aria-label="Close"
+                          aria-label="Close settings"
                         >
-                          <i className="fas fa-times"></i>
+                          <i className="fas fa-times" aria-hidden="true"></i>
                         </button>
                       </div>
                     </div>
@@ -678,153 +745,7 @@ const Navbar = () => {
               )}
             </div>
           </div>
-
-          {/* Mobile Search Button */}
-          {location.pathname === "/" && (
-            <button
-              onClick={() => setIsSearchFocused(true)}
-              className="md:hidden p-2 rounded-lg hover:bg-neutral-100 transition-colors"
-              aria-label="Search"
-            >
-              <i className="fas fa-search text-neutral-700"></i>
-            </button>
-          )}
         </div>
-
-        {/* Mobile Menu Overlay */}
-        {isMenuOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
-            <div className="bg-white h-screen w-4/5 max-w-sm py-4 px-6 overflow-y-auto">
-              {/* Mobile Menu Content */}
-              <div className="space-y-4">
-                {/* Mobile Search - Only on homepage */}
-                {location.pathname === "/" && (
-                  <div className="relative">
-                    <form onSubmit={handleSearchSubmit} className="w-full">
-                      <input
-                        type="text"
-                        placeholder={getText("common", "search")}
-                        value={searchQuery}
-                        onChange={handleSearchChange}
-                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                      <button
-                        type="submit"
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-neutral-500"
-                      >
-                        <i className="fas fa-search"></i>
-                      </button>
-                    </form>
-                  </div>
-                )}
-
-                {/* Mobile Menu Items */}
-                <div className="space-y-2">
-                  <Link
-                    to="/host/become-a-host"
-                    className="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {getText("common", "becomeHost")}
-                  </Link>
-
-                  {!isAuthenticated ? (
-                    <>
-                      <Link
-                        to="/login"
-                        className="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {getText("common", "login")}
-                      </Link>
-                      <Link
-                        to="/register"
-                        className="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {getText("common", "signup")}
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        to="/messages"
-                        className="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {getText("common", "messages")}
-                      </Link>
-                      <Link
-                        to="/trips"
-                        className="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {getText("common", "trips")}
-                      </Link>
-                      <Link
-                        to="/wishlist"
-                        className="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {getText("common", "wishlist")}
-                      </Link>
-                      <Link
-                        to="/host/listings"
-                        className="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Manage listings
-                      </Link>
-                      <Link
-                        to="/account"
-                        className="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {getText("common", "account")}
-                      </Link>
-                      <button
-                        className="w-full text-left px-4 py-2 text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                        onClick={() => {
-                          handleLogout();
-                          setIsMenuOpen(false);
-                        }}
-                      >
-                        {getText("common", "logout")}
-                      </button>
-                    </>
-                  )}
-
-                  <Link
-                    to="/help"
-                    className="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 rounded-lg"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {getText("common", "help")}
-                  </Link>
-                </div>
-
-                {/* Language and Currency Section in Mobile Menu */}
-                <div className="mt-6 pt-6 border-t border-neutral-200">
-                  <button
-                    onClick={() => {
-                      setIsSettingsMenuOpen(true);
-                      setIsMenuOpen(false);
-                    }}
-                    className="flex items-center space-x-2 px-4 py-2 text-neutral-700 hover:bg-neutral-50 rounded-lg w-full"
-                  >
-                    <i className="fas fa-globe"></i>
-                    <span>Language & Currency</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            {/* Close menu when clicking outside */}
-            <div
-              className="h-full w-1/5 ml-auto"
-              onClick={() => setIsMenuOpen(false)}
-            ></div>
-          </div>
-        )}
 
         {/* Mobile Search Overlay */}
         {isSearchFocused && location.pathname === "/" && (
