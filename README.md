@@ -138,13 +138,8 @@ EMAIL_PASS=your_email_password
 NODE_ENV=development
 ```
 
-4. Create admin user (optional):
 
-```bash
-node create-admin.js
-```
-
-5. Start server:
+4. Start server:
 
 ```bash
 npm run dev
