@@ -6,11 +6,11 @@ const NavLogo = () => {
   return (
     <Link
       to="/"
-      className="group flex items-center space-x-3 px-2 py-1 rounded-lg hover:bg-neutral-50 transition-all duration-300"
+      className="group flex items-center space-x-3 px-2 py-1 rounded-lg hover:bg-neutral-50 transition-all duration-300 shrink-0"
       aria-label="Smart Rent System - Home"
     >
       {/* Logo Container with Hover Effect */}
-      <div className="relative">
+      <div className="relative shrink-0">
         <div className="absolute inset-0 bg-red-500/10 rounded-full scale-110 group-hover:scale-125 transition-transform duration-300 ease-out" />
         <img
           src={logoSvg}
