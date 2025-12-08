@@ -945,23 +945,23 @@ const Listings = () => {
         style={{ zIndex: 10 }}
       >
         <div className="container mx-auto px-4">
-          <div className="flex justify-around items-center">
-            <div className="relative max-w-4xl flex-grow overflow-hidden">
+          <div className="flex items-center justify-between">
+            <div className="relative w-full max-w-5xl mx-auto">
               {/* Left Arrow */}
               <button
                 onClick={() => scrollCategories("left")}
-                className="absolute top-1/2 -translate-y-1/2 bg-white border border-neutral-200 shadow-lg hover:shadow-xl hover:bg-neutral-100 transition-all duration-200 rounded-full w-10 h-10 flex items-center justify-center z-20 active:scale-95"
+                className="absolute left-0 top-1/2 -translate-y-1/2 bg-white border border-neutral-200 shadow-lg hover:shadow-xl hover:bg-neutral-100 transition-all duration-200 rounded-full w-10 h-10 flex items-center justify-center z-20 active:scale-95"
                 aria-label="Scroll left"
               >
-                <i className="fas fa-chevron-left text-2xl text-primary-600"></i>
+                <i className="fas fa-chevron-left text-xl text-primary-600"></i>
               </button>
 
               {/* Scrollable Categories */}
               <div
-                className="flex overflow-x-auto pb-2 pl-8 pr-8 scrollbar-hide"
+                className="flex overflow-x-auto px-12 py-2 scrollbar-hide"
                 ref={categoriesContainerRef}
               >
-                <div className="flex space-x-8">
+                <div className="flex space-x-8 items-center h-full">
                   {categories.map((category) => {
                     // Debug the category
                     if (activeCategory === category.id) {
@@ -972,10 +972,10 @@ const Listings = () => {
                       <div
                         key={category.id}
                         onClick={() => handleCategoryClick(category.id)}
-                        className={`flex flex-col items-center cursor-pointer transition-all duration-300 min-w-max ${
+                        className={`flex flex-col items-center cursor-pointer transition-all duration-300 min-w-max h-full py-1 ${
                           activeCategory === category.id
-                            ? "text-primary-600 border-b-2 border-primary-600 scale-110"
-                            : "text-neutral-500 hover:text-primary-500 hover:scale-105"
+                            ? "text-primary-600 border-b-2 border-primary-600 scale-105"
+                            : "text-neutral-500 hover:text-primary-500 hover:scale-100"
                         }`}
                       >
                         <div
@@ -1011,7 +1011,7 @@ const Listings = () => {
                 className="absolute right-0 top-1/2 -translate-y-1/2 bg-white border border-neutral-200 shadow-lg hover:shadow-xl hover:bg-neutral-100 transition-all duration-200 rounded-full w-10 h-10 flex items-center justify-center z-20 active:scale-95"
                 aria-label="Scroll right"
               >
-                <i className="fas fa-chevron-right text-2xl text-primary-600"></i>
+                <i className="fas fa-chevron-right text-xl text-primary-600"></i>
               </button>
             </div>
 
