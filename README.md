@@ -325,13 +325,24 @@ ISC
 
 ---
 
-## Contributing
+## Community & SWOC
 
-1. Fork repository
-2. Create feature branch
-3. Commit changes
-4. Push to branch
-5. Create Pull Request
+![SWOC Badge](assets/Project%20Admin%20Badge.png)
+
+We are proud to be a part of **Script Winter of Code (SWOC)**!
+
+### How to Contribute
+
+We welcome contributions from everyone! Please check our [Contributing Guidelines](CONTRIBUTING.md) for details on how to get started.
+
+1.  Read the `CONTRIBUTING.md`.
+2.  Find an issue to work on (look for `good first issue` or `SWOC` labels).
+3.  Fork the repository.
+4.  Create a branch.
+5.  Submit a Pull Request!
+
+
+
 
 ---
 
