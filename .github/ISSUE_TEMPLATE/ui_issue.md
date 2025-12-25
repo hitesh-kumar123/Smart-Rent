@@ -1,28 +1,36 @@
 ---
-name: UI / UX Issue
-about: Report UI, layout, responsiveness, or design-related issues
-title: "[UI] "
-labels: ["ui", "frontend"]
+name: "🎨 Style Enhancement"
+about: Suggest UI/UX or design improvements for Codify (MERN + TailwindCSS )
+title: "Style: [Brief Description]"
+labels: "style enhencement"
 assignees: ""
 ---
 
-## Description
-Clearly describe the UI/UX issue you are facing.
+## ✨ Current Style Issue
+<!-- Example: "The navbar text feels too small on mobile" -->
+- Problem: [Describe the UI/UX or styling issue]
 
-## Screenshots / Screen Recording
-Attach screenshots or videos to help explain the issue.
+## 💡 Proposed Style Changes
+<!-- Clearly describe what you want to improve -->
+- Suggested Change: [Typography, spacing, colors, etc.]
+- Technical Notes (optional): [Tailwind classes, JSX components, responsive breakpoints]
+- add example (optional)
 
-## Expected Behavior
-Describe how the UI should look or behave.
+## 🔍 Alternatives Considered
+<!-- List other design approaches you thought about -->
 
-## Actual Behavior
-Describe what is currently happening.
 
-## Device & Environment
-- Device: (Mobile / Desktop)
-- Screen size:
-- Browser:
-- OS:
+## 📐 Mockups & Visual References
+<!-- Add visuals if possible -->
+- [ ] Attach Figma/Sketch/Screenshot
+- [ ] Link to similar UI in other apps
 
-## Additional Context
-Any extra information that may help fix the issue.
+## 🧩 Impact on UI/UX
+<!-- Who will this benefit and how? -->
+- Target Users: [User/Admins]
+- Value: [Better readability, smoother navigation, accessibility improvements]
+
+## 🌱 Additional Context
+<!-- Any other details? -->
+- Related Components: #[issue_number]
+- Technical Constraints: [Browser compatibility, Tailwind config, etc.]

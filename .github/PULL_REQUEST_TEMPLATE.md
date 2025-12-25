@@ -1,36 +1,49 @@
-# Description
+---
+name: "📦 Pull Request"
+about: Submit changes for review
+title: "PR: [Brief Description]"
+labels: ""
+assignees: ""
+---
 
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
+## 📌 Linked Issue
+<!-- Link to the issue this PR addresses (e.g. "Closes #123" or "Related to #456") -->
+- [ ] Connected to #issue_number
+---
 
-Fixes # (issue)
+## 🛠 Changes Made
+<!-- Bullet-point summary of your changes -->
+- Added: [Description]
+- Fixed: [Description]
+- Updated: [Description]
 
-## Type of change
+---
+## 🧪 Testing
+<!-- How did you verify your changes? -->
+- [ ] Ran unit tests (`npm test`)
+- [ ] Tested manually (describe below):
+  - Test case 1: [Steps + Expected Result]
+  - Test case 2: [Steps + Expected Result]
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
+---
+## 📸 UI Changes (if applicable)
+<!-- Before/after screenshots or GIFs -->
+| Before | After |
+|--------|-------|
+| [Image] | [Image] |
 
-# How Has This Been Tested?
+---
+## 📝 Documentation Updates
+- [ ] Updated README/docs
+- [ ] Added code comments
+---
 
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration
+## ✅ Checklist
+- [ ] Created a new branch for PR
+- [ ] Have stared the repository
+- [ ] Follows [JavaScript Styleguide](CONTRIBUTING.md#javascript-styleguide)
+- [ ] No console warnings/errors
+- [ ] Commit messages follow [Git Guidelines](CONTRIBUTING.md#git-commit-messages)
 
-- [ ] Test A
-- [ ] Test B
-
-**Test Configuration**:
-* Firmware version:
-* Hardware:
-* Toolchain:
-* SDK:
-
-# Checklist:
-
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published in downstream modules
+## 💡 Additional Notes (If any)
+<!-- Optional: Deployment needs, breaking changes, etc. -->

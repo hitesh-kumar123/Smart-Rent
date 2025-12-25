@@ -1,8 +1,8 @@
-# Contributing to Smart-Rent
+# Contributing to Smart Rent System
 
-Welcome to the Smart-Rent project!
+Welcome to the Smart Rent System project!
 
-First off, thank you for considering contributing to Smart-Rent. It's people like you that make the open-source community such an amazing place to learn, inspire, and create.
+First off, thank you for considering contributing to Smart Rent System. It's people like you that make the open-source community such an amazing place to learn, inspire, and create.
 
 This project is part of **Social Winter of Code (SWoC)** and is built using the **MERN Stack** (MongoDB, Express, React, Node.js). We welcome contributors of all skill levels, from beginners to experienced developers.
 
@@ -32,8 +32,8 @@ Follow these steps to get the project running on your local machine.
 
 2.  **Clone your fork**
     ```bash
-    git clone https://github.com/YOUR-USERNAME/Smart-Rent.git
-    cd Smart-Rent
+    git clone https://github.com/YOUR-USERNAME/Smart-Rent-System.git
+    cd Smart-Rent-System
     ```
 
 3.  **Setup Backend**
@@ -113,7 +113,7 @@ If you have questions or get stuck:
 - Join the project's communication channel (Discord/Slack/Etc) if available.
 - Be respectful and patient.
 
-## 9. Code of Conduct
+## 9. Code of Conduct 
 
 All contributors are expected to adhere to our [Code of Conduct](./CODE_OF_CONDUCT.md). We pledge to create a harassment-free community for everyone.
 

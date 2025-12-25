@@ -1,26 +1,36 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: "[FEATURE] "
-labels: enhancement
-assignees: ''
-
+name: "✨ Feature Request"
+about: Suggest an idea for Codify
+title: "Feat: [Brief Description]"
+labels: "enhancement"
+assignees: ""
 ---
 
-## 📝 Problem Statement
-Is your feature request related to a problem? Please describe it clearly.
-<!-- Ex: I'm always frustrated when... -->
+## 🚀 Is your feature request related to a problem?
+<!-- Example: "I'm frustrated when I can't save code drafts between sessions" -->
+- Problem: [Describe the pain point]
 
 ## 💡 Proposed Solution
-Describe the solution you'd like to see implemented.
-<!-- A clear and concise description of what you want to happen. -->
+<!-- Clearly describe what you want to happen -->
+- Solution: [Detailed description]
+- Technical Notes (optional): [API changes, database needs, etc.]
 
-## 🧩 Alternatives Considered
-Have you considered any alternative solutions or workarounds?
-<!-- Describe alternatives you've considered and why you rejected them. -->
+## 🔍 Alternatives Considered
+<!-- List other approaches you've thought about -->
+1. Alternative A: [Description + why it's less ideal]
+2. Alternative B: [Description + why it's less ideal]
 
-## 🔄 Impact on Existing Functionality
-Will this feature require changes to current behavior or break backward compatibility?
+## 📐 Mockups & Examples
+<!-- Add visuals if possible -->
+- [ ] Attach sketch/Screenshot
+- [ ] Link to similar features in other apps
 
-## 🎨 Additional Context
-Add any other context, screenshots, or mockups about the feature request here.
+## 🧩 Potential Impact
+<!-- Who will this benefit and how? -->
+- Target Users: [Students/Teachers/Admins]
+- Value: [Time saved, improved UX, etc.]
+
+## 🌱 Additional Context
+<!-- Any other details? -->
+- Related Features: #[issue_number]
+- Technical Constraints: [If known]
