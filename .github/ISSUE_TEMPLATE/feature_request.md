@@ -1,6 +1,6 @@
 ---
-name: "✨ Feature Request"
-about: Suggest an idea for Codify
+name: "Feature Request"
+about: Suggest an idea for Smart Rent System
 title: "Feat: [Brief Description]"
 labels: "enhancement"
 assignees: ""

@@ -1,8 +1,8 @@
 ---
-name: "🎨 Style Enhancement"
-about: Suggest UI/UX or design improvements for Codify (MERN + TailwindCSS )
+name: "🎨 UI/UX Issue"
+about: Suggest UI/UX or design improvements for Smart Rent System (MERN + TailwindCSS )
 title: "Style: [Brief Description]"
-labels: "style enhencement"
+labels: "ui"
 assignees: ""
 ---
 
